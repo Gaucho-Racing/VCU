@@ -1,17 +1,18 @@
 //main.cpp
-// @rt.z
+//@rt.z, 0303
 
 #include <Arduino.h>
 
-enum States = {OFF, ON, ON_READY, DRIVE, CHARGE_PRECHARGE, CHARGE_CHARGING, CHARGE_FULL};
+enum States = {ERROR, OFF, ON, ON_READY, DRIVE, CHARGE_PRECHARGE, CHARGE_CHARGING, CHARGE_FULL};
 volatile States state;
 
-//placeholder #includes for until the actual files come out
-/*
-#include "on_off.cpp"
-#include "drive.cpp"
-#include "charge.cpp"
-*/
+//includes commended out until the actual files are ready
+//#include "on.cpp"
+//#include "off.cpp"
+//#include "on_ready.cpp"
+//#include "FULL.cpp"
+//#include "PRECHARGE.cpp"
+//#include "CHARGING.cpp"
 
 void setup() {
    state = OFF;
@@ -29,9 +30,9 @@ void loop() {
          state = DRIVE();
       case CHARGE_PRECHARGE:
          state = CHARGE_PRECHARGE();
-      case CHARGE_CHARGING():
+      case CHARGE_CHARGING:
          state = CHARGE_CHARGING();
-      case CHARGE_FULL():
+      case CHARGE_FULL:
          state = CHARGE_FULL();
    }
 }
