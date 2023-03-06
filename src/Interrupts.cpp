@@ -7,7 +7,7 @@
 // interrupt masks and flag bytes: https://www.pjrc.com/teensy/interrupts.html
 
 
-//BSPD/APPS interference BSPD>.25 and Brakes engages
+//BSPD/APPS interference BSPD>.25 and Brakes engaged
 //this is not actually highest priority interrupt, im just testing stuff out
 
 //byte, bit# for INT0_vect:	EIMSK,IINT0 --> this bit needs to be enabled somewhere
@@ -19,6 +19,8 @@
 //these need to be done with bit wise operations, which are documented on teensy website
 
 //will add to this as the week goes on, but this should be the format in which interupts are defined and implemented
+
+//Need to ask josh today at meeting abt how to do the mask bit stuff
 
 
 
