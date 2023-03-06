@@ -12,6 +12,17 @@
 
 //byte, bit# for INT0_vect:	EIMSK,IINT0 --> this bit needs to be enabled somewhere
 
+//first need to reset interrupt flag which is EIFR,INTF0
+// then set the interrupt mask above
+//finally enable global interrupts 
+
+//these need to be done with bit wise operations, which are documented on teensy website
+
+//will add to this as the week goes on, but this should be the format in which interupts are defined and implemented
+
+
+
+
 ISR(INT0_vect) {
     //realistically this can only happen during MOTOR_THROTTLE/DRIVE state
     States stateFrom = state; //store the state that we came from before interrupt triggered
