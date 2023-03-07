@@ -11,6 +11,7 @@ States drive() {
     // brake pedal plausibility check
     if(getThrottleIn() > 25 && getBrakeIn() > 0) {
       setRcurrent(0);
+      return OFF;
     }
     
     // set motor output
