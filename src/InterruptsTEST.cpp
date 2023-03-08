@@ -1,5 +1,10 @@
+// Proper syntax usage for arm cortex m7 microcontrollers
+// Nikunj Parasar 03/08/2023
+
 #include <stdint.h>
 #include "imxrt.h"
+
+
 
 // Define the interrupt priority level
 #define MY_INTERRUPT_PRIORITY 0x80 // set to medium priority
@@ -36,7 +41,7 @@ Here's a breakdown of the code:
 
 #include <stdint.h> and "stm32f7xx.h" include the necessary header files.
             USE imxrt.h INSTEAD OF stm32f7xx.h ABOVE
-            
+
 #define MY_INTERRUPT_PRIORITY 0x01 defines the interrupt priority level. In this example, we set it to the lowest priority (0x01).
 
 #define MY_INTERRUPT_NUMBER 0x01 defines the interrupt number. In this example, we set it to 1.
