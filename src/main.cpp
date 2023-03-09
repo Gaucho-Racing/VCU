@@ -1,37 +1,36 @@
-//main.cpp
-// @rt.z
-
 #include <Arduino.h>
+#include <imxrt.h>
 
-enum States = {OFF, ON, ON_READY, DRIVE, CHARGE_PRECHARGE, CHARGE_CHARGING, CHARGE_FULL};
-volatile States state;
+volatile int foo = 0;
 
-//placeholder #includes for until the actual files come out
-/*
-#include "on_off.cpp"
-#include "drive.cpp"
-#include "charge.cpp"
-*/
+void IRQ_GPI01_INT0_Handler() {
+  
+  foo = 1;
+  
+}
 
 void setup() {
-   state = OFF;
+  
+  NVIC_ENABLE_IRQ(IRQ_GPIO1_INT0);
+  attachInterruptVector(IRQ_GPIO1_INT0, IRQ_GPI01_INT0_Handler());
+
 }
 
 void loop() {
-   switch (state) {
-      case OFF:
-         state = OFF();
-      case ON:
-         state = ON();
-      case ON_READY:
-         state = ON_READY();
-      case DRIVE:
-         state = DRIVE();
-      case CHARGE_PRECHARGE:
-         state = CHARGE_PRECHARGE();
-      case CHARGE_CHARGING():
-         state = CHARGE_CHARGING();
-      case CHARGE_FULL():
-         state = CHARGE_FULL();
-   }
+  // generate a random integer between 0 and 5
+  foo = random(6);
+
+  // check if foo is greater than 1
+  Serial.print("foo is ");
+  Serial.print(foo);
+  if (foo > 1) {
+    // set the interrupt flag for PORTB in the NVIC
+    NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT0);
+  }
+  Serial.print("foo is ");
+  Serial.print(foo);
+
+  delay(1000); // wait for 1 second
 }
+
+
