@@ -12,7 +12,7 @@ void IRQ_GPI01_INT0_Handler() {
 void setup() {
   
   NVIC_ENABLE_IRQ(IRQ_GPIO1_INT0);
-  attachInterruptVector(IRQ_GPIO1_INT0, IRQ_GPI01_INT0_Handler());
+  attachInterruptVector(IRQ_GPIO1_INT0, &IRQ_GPI01_INT0_Handler);
 
 }
 
