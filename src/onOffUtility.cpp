@@ -2,7 +2,7 @@
 
 //returns true if there is current running to the motor
 bool onPressed(){ 
-    if(getDCCurrent() > 0) return true;
+    if(Inverter.getDCCurrent() > 0) return true;
     else return false;
 }
 
