@@ -15,5 +15,6 @@ States ON() {
       return ON_READY;
    } else { //else throw the interrupt
       //interrupt code goes here
+      return OFF; //a stub
    }
 }
