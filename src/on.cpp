@@ -1,7 +1,7 @@
 //on.cpp
 #include <iostream>
 //relevant files
-#include "utility.cpp"
+#include "onOffUtility.cpp"
 
 using namespace std;
 
@@ -9,15 +9,11 @@ using namespace std;
 //One deliberate Systems check, 
 //Read info from can and send to dashboard, 
 //check for all conditions to allow for ON_READY
-States on() {
-    while(1){
-        //Get data
-        //motorOutput = 0;
-        setCurrent(0);
-        //Send data to dash
-
-        if(systemsCheck()){
-            return ON_READY;
-        }
-    }
+States ON() {
+   setRCurrent(0);
+   if(!systemsCheck()) { //if it returns zero, we move to ON_READY
+      return ON_READY;
+   } else { //else throw the interrupt
+      //interrupt code goes here
+   }
 }

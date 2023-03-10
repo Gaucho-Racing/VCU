@@ -7,9 +7,9 @@ enum States = {ERROR, OFF, ON, ON_READY, DRIVE, CHARGE_PRECHARGE, CHARGE_CHARGIN
 volatile States state;
 
 //includes commended out until the actual files are ready
-//#include "on.cpp"
-//#include "off.cpp"
-//#include "on_ready.cpp"
+#include "on.cpp"
+#include "off.cpp"
+#include "on_ready.cpp"
 //#include "FULL.cpp"
 //#include "PRECHARGE.cpp"
 //#include "CHARGING.cpp"
