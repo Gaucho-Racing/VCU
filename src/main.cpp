@@ -22,13 +22,13 @@ void loop() {
 
   // check if foo is greater than 1
   Serial.print("foo is ");
-  Serial.print(foo);
+  Serial.println(foo);
   if (foo > 1) {
     // set the interrupt flag for PORTB in the NVIC
     NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT0);
   }
   Serial.print("foo is ");
-  Serial.print(foo);
+  Serial.println(foo);
 
   delay(1000); // wait for 1 second
 }
