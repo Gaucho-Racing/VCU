@@ -12,7 +12,8 @@ using namespace std;
 States on() {
     while(1){
         //Get data
-        motorOutput = 0;
+        //motorOutput = 0;
+        setCurrent(0);
         //Send data to dash
 
         if(systemsCheck()){
