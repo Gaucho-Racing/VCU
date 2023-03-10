@@ -1,6 +1,7 @@
 //on.cpp
 #include <iostream>
 //relevant files
+#include "utility.cpp"
 
 using namespace std;
 
@@ -14,7 +15,7 @@ States on() {
         motorOutput = 0;
         //Send data to dash
 
-        if(Systemscheck()){
+        if(systemsCheck()){
             return ON_READY;
         }
     }
