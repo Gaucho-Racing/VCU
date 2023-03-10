@@ -27,6 +27,7 @@ float motorOut(float throttle) {
   // can adjust accordingly later
   
   // figure out range/scaling from getXXspeed()
+  // also not sure if avg is the best way to go
   float front = ( getFRspeed() + getFFspeed() ) / 2; // CAN typo lol, should be FL not FF
   float rear = ( getRRspeed() + getRLspeed() ) / 2; // MIGHT CHANGE TO MOTOR SPEED IN FUTURE
 
