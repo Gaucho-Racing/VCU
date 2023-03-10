@@ -1,9 +1,10 @@
 // on_ready.cpp
+#include "Nodes.h"
 
 States on_ready() {
     while(1) {
         // global variable motorOutput
-        motorOutput = 0;
+        setCurrent(0); //to set motor output to 0
         // Get necessary data
         // if drive mode engaged
         if(drive()){
