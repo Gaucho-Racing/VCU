@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-enum States = {ERROR, OFF, ON, ON_READY, DRIVE, CHARGE_PRECHARGE, CHARGE_CHARGING, CHARGE_FULL};
+enum States {ERROR, OFF, ON, ON_READY, DRIVE, CHARGE_PRECHARGE, CHARGE_CHARGING, CHARGE_FULL};
 volatile States state;
 
 //includes commended out until the actual files are ready
