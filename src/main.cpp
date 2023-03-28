@@ -5,7 +5,9 @@
 
 volatile States state;
 
-#include "stubs.cpp"
+#include "stubs.h"
+
+// #include "stubs.cpp"
 
 void setup() {
    state = OFF;

@@ -3,7 +3,7 @@
 // a file full of stubs to test whether or not the main function will build.
 // thanks, @Th3will
 
-#include "main.h"
+#include "stubs.h"
 
 States off() {
    Serial.println("0");
