@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <imxrt.h>
-
+#include "I_no_can_speak_flex.h"
 
 
 // Variables to hold input states
@@ -16,6 +16,8 @@ volatile bool current_too_high = false;
 volatile bool system_error = false;
 volatile bool insulation_fault = false;
 volatile bool car_crash = false;
+
+I_no_can_speak_flex fadslkjj(true);
 
 // Interrupt handler for battery temperature high
 void IRQ_GPI01_INT0_Handler() {
@@ -110,7 +112,7 @@ void setup() {
   NVIC_ENABLE_IRQ(IRQ_GPIO1_INT1);
 
   // Enable interrupts for no current and accelerator and brakes
-  attachInterruptVector(IRQ_GPIO2_INT0, &IRQ_GPI02_INT0_Handler);
+  attachInterruptVector(IRQ_GPIO1_INT2, &IRQ_GPI02_INT0_Handler);
   NVIC_ENABLE_IRQ(IRQ_GPIO2_INT0);
   
   attachInterruptVector(IRQ_GPIO2_INT1, &IRQ_GPI02_INT1_Handler);
