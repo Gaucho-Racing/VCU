@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <imxrt.h>
 #include "I_no_can_speak_flex.h"
+#include "string"
 
 
 // Variables to hold input states
@@ -16,8 +17,12 @@ volatile bool current_too_high = false;
 volatile bool system_error = false;
 volatile bool insulation_fault = false;
 volatile bool car_crash = false;
+//dash
+volatile bool sendToDash;
+//message to send to dash
+volatile std::string errMess;
 
-I_no_can_speak_flex fadslkjj(true);
+I_no_can_speak_flex car(true);
 
 // Interrupt handler for battery temperature high
 void IRQ_GPI01_INT0_Handler() {
@@ -113,38 +118,38 @@ void setup() {
 
   // Enable interrupts for no current and accelerator and brakes
   attachInterruptVector(IRQ_GPIO1_INT2, &IRQ_GPI02_INT0_Handler);
-  NVIC_ENABLE_IRQ(IRQ_GPIO2_INT0);
+  NVIC_ENABLE_IRQ(IRQ_GPIO1_INT2);
   
-  attachInterruptVector(IRQ_GPIO2_INT1, &IRQ_GPI02_INT1_Handler);
-  NVIC_ENABLE_IRQ(IRQ_GPIO2_INT1);
+  attachInterruptVector(IRQ_GPIO1_INT3, &IRQ_GPI02_INT1_Handler);
+  NVIC_ENABLE_IRQ(IRQ_GPIO1_INT3);
   
   // Enable interrupts for hard brake and unresponsive throttle
-  attachInterruptVector(IRQ_GPIO3_INT0, &IRQ_GPI03_INT0_Handler);
-  NVIC_ENABLE_IRQ(IRQ_GPIO3_INT0);
+  attachInterruptVector(IRQ_GPIO1_INT4, &IRQ_GPI03_INT0_Handler);
+  NVIC_ENABLE_IRQ(IRQ_GPIO1_INT4);
   
-  attachInterruptVector(IRQ_GPIO3_INT1, &IRQ_GPI03_INT1_Handler);
-  NVIC_ENABLE_IRQ(IRQ_GPIO3_INT1);
+  attachInterruptVector(IRQ_GPIO1_INT5, &IRQ_GPI03_INT1_Handler);
+  NVIC_ENABLE_IRQ(IRQ_GPIO1_INT5);
   
   // Enable interrupts for motor temperature low and no CAN signal
-  attachInterruptVector(IRQ_GPIO4_INT0, &IRQ_GPI04_INT0_Handler);
-  NVIC_ENABLE_IRQ(IRQ_GPIO4_INT0);
+  attachInterruptVector(IRQ_GPIO1_INT6, &IRQ_GPI04_INT0_Handler);
+  NVIC_ENABLE_IRQ(IRQ_GPIO1_INT6);
   
-  attachInterruptVector(IRQ_GPIO4_INT1, &IRQ_GPI04_INT1_Handler);
-  NVIC_ENABLE_IRQ(IRQ_GPIO4_INT1);
+  attachInterruptVector(IRQ_GPIO1_INT7, &IRQ_GPI04_INT1_Handler);
+  NVIC_ENABLE_IRQ(IRQ_GPIO1_INT7);
   
   // Enable interrupts for current too high and system error
-  attachInterruptVector(IRQ_GPIO5_INT0, &IRQ_GPI05_INT0_Handler);
-  NVIC_ENABLE_IRQ(IRQ_GPIO5_INT0);
+  attachInterruptVector(IRQ_GPIO1_0_15, &IRQ_GPI05_INT0_Handler);
+  NVIC_ENABLE_IRQ(IRQ_GPIO1_0_15);
   
-  attachInterruptVector(IRQ_GPIO5_INT1, &IRQ_GPI05_INT1_Handler);
-  NVIC_ENABLE_IRQ(IRQ_GPIO5_INT1);
+  attachInterruptVector(IRQ_GPIO1_16_31, &IRQ_GPI05_INT1_Handler);
+  NVIC_ENABLE_IRQ(IRQ_GPIO1_16_31);
   
   // Enable interrupts for insulation fault and car crash
-  attachInterruptVector(IRQ_GPIO6_INT0, &IRQ_GPI06_INT0_Handler);
-  NVIC_ENABLE_IRQ(IRQ_GPIO6_INT0);
+  attachInterruptVector(IRQ_GPIO2_0_15, &IRQ_GPI06_INT0_Handler);
+  NVIC_ENABLE_IRQ(IRQ_GPIO2_0_15);
   
-  attachInterruptVector(IRQ_GPIO6_INT1, &IRQ_GPI06_INT1_Handler);
-  NVIC_ENABLE_IRQ(IRQ_GPIO6_INT1);
+  attachInterruptVector(IRQ_GPIO2_16_31, &IRQ_GPI06_INT1_Handler);
+  NVIC_ENABLE_IRQ(IRQ_GPIO2_16_31);
 }
 
   
