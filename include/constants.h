@@ -1,11 +1,6 @@
 #ifndef CONSTANTS
 #define CONSTANTS
 //canIDs
-const int invID = 0;
-const int batID = 1;
-const int imdID = 2;
-const int chargerID = 3;
-
 
 
 //thresholds
