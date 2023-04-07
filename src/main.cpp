@@ -2,8 +2,8 @@
 #include <imxrt.h>
 #include "utility.h"
 #include "I_no_can_speak_flex.h"
-#include "string"
 #include "main.h"
+#include "constants.h"
 
 volatile States state;
 
@@ -19,19 +19,19 @@ void loop() {
 
 
    // Check for battery temperature high and low
-  if(car.BMS.getTemp() > PLACEHOLDER_VALUE){
+  if(car.BMS.getTemp() > BAT_TEMP_MAX){
     NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT0);
   }
   
-  if (car.BMS.getTemp() < PLACEHOLDER_VALUE) {
+  if (car.BMS.getTemp() < BAT_TEMP_MIN) {
     NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT1);
   }
 
   // Check for no current and accelerator and brakes
-  if (car.BMS.getCurrent() < THRESHOLD_PLACEHOLDER) {
+  if (car.BMS.getCurrent() < NO_CURRENT) {
     NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT2);
   }
-  if (car.pedals.getAPPS() > 0.25 && (car.pedals.getBrakePressure1() > THRESHOLD || car.pedals.getBrakePressure2() > THRESHOLD_PLACEHOLDER)){
+  if (car.pedals.getAPPS() > 0.25 && (car.pedals.getBrakePressure1() > MIN_BRAKE_PRESSURE || car.pedals.getBrakePressure2() > MIN_BRAKE_PRESSURE)){
     NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT3);
   }
 
@@ -55,6 +55,7 @@ void loop() {
   if (car.BMS.getCurrent()>THRESHOLD_PLACEHOLDER_CURR) {
     NVIC_TRIGGER_IRQ(IRQ_GPIO1_0_15);
   }
+
   //????
   if (errObserver.system_error) {
     NVIC_TRIGGER_IRQ(IRQ_GPIO1_16_31);
@@ -128,51 +129,36 @@ void IRQ_GPI03_INT0_Handler() {
 
 // Interrupt handler for unresponsive throttle
 void IRQ_GPI03_INT1_Handler() {
-  if (errObserver.unresponsive_throttle) {
-    // Do something
-  }
+
 }
 
 // Interrupt handler for motor temperature low
 void IRQ_GPI04_INT0_Handler() {
-  if (errObserver.motor_temp_low) {
-    // Do something
-  }
+
 }
 
 // Interrupt handler for no CAN signal
 void IRQ_GPI04_INT1_Handler() {
-  if (errObserver.no_can_signal) {
-    // Do something
-  }
+
 }
 
 // Interrupt handler for current too high
 void IRQ_GPI05_INT0_Handler() {
-  if (errObserver.current_too_high) {
-    // Do something
-  }
-}
 
+}
 // Interrupt handler for system error
 void IRQ_GPI05_INT1_Handler() {
-  if (errObserver.system_error) {
-    // Do something
-  }
+
 }
 
 // Interrupt handler for insulation fault
 void IRQ_GPI06_INT0_Handler() {
-  if (errObserver.insulation_fault) {
-    // Do something
-  }
+
 }
 
 // Interrupt handler for car crash
 void IRQ_GPI06_INT1_Handler() {
-  if (errObserver.car_crash) {
-    // Do something
-  }
+
 }
 
 void setup() {
