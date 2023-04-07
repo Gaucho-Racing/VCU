@@ -1,9 +1,11 @@
 //main.cpp
 // @rt.z
 
+
 #include <Arduino.h>
 #include <imxrt.h>
 #include "string"
+
 #include "main.h"
 
 volatile States state;
@@ -21,7 +23,7 @@ I_no_can_speak_flex car(true);
 void loop() {
    switch (state) {
       case OFF:
-         state = off());
+         state = off();
          break;
       case ON:
          state = on();
@@ -30,7 +32,7 @@ void loop() {
          state = on_ready();
          break;
       case DRIVE:
-         state = drive(car*);
+         state = drive();
          break;
       case CHARGE_PRECHARGE:
          state = charge_precharge();
@@ -40,9 +42,6 @@ void loop() {
          break;
       case CHARGE_FULL:
          state = charge_full();
-         break;
-      case ERROR:
-         state = off(); // TEMPORARY
          break;
    }
 }
