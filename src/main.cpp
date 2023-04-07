@@ -1,6 +1,9 @@
 //main.cpp
 // @rt.z
 
+#include <Arduino.h>
+#include <imxrt.h>
+#include "string"
 #include "main.h"
 
 volatile States state;
@@ -35,6 +38,9 @@ void loop() {
          break;
       case CHARGE_FULL:
          state = charge_full();
+         break;
+      case ERROR:
+         state = off(); // TEMPORARY
          break;
    }
 }
