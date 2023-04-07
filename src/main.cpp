@@ -16,7 +16,62 @@ void setup() {
 }
 
 void loop() {
-   switch (state) {
+
+
+   // Check for battery temperature high and low
+  if(car.BMS.getTemp() > PLACEHOLDER_VALUE){
+    NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT0);
+  }
+  
+  if (car.BMS.getTemp() < PLACEHOLDER_VALUE) {
+    NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT1);
+  }
+
+  // Check for no current and accelerator and brakes
+  if (car.BMS.getCurrent() < THRESHOLD_PLACEHOLDER) {
+    NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT2);
+  }
+  if (car.pedals.getAPPS() > 0.25 && (car.pedals.getBrakePressure1() > THRESHOLD || car.pedals.getBrakePressure2() > THRESHOLD_PLACEHOLDER)){
+    NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT3);
+  }
+
+  // Check for hard brake and unresponsive throttle
+  if (errObserver.hard_brake) {
+    NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT4);
+  }
+  if (errObserver.unresponsive_throttle) {
+    NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT5);
+  }
+
+  // Check for motor temperature low and no CAN signal
+  if (errObserver.motor_temp_low) {
+    NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT6);
+  }
+  if (errObserver.no_can_signal) {
+    NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT7);
+  }
+
+  // Check for current too high and system err
+  if (car.BMS.getCurrent()>THRESHOLD_PLACEHOLDER_CURR) {
+    NVIC_TRIGGER_IRQ(IRQ_GPIO1_0_15);
+  }
+  //????
+  if (errObserver.system_error) {
+    NVIC_TRIGGER_IRQ(IRQ_GPIO1_16_31);
+  }
+
+  // Check for insulation fault and car crash
+  if (car.IMD.getHardware_Error()) {
+    NVIC_TRIGGER_IRQ(IRQ_GPIO2_0_15);
+  }
+  if (errObserver.car_crash) {
+    NVIC_TRIGGER_IRQ(IRQ_GPIO2_16_31);
+  }
+
+  // Delay for a short period of time to prevent the loop from running too frequently
+  //delay(100); 
+
+     switch (state) {
       case OFF:
          state = off();
          break;
@@ -163,63 +218,6 @@ void setup() {
   attachInterruptVector(IRQ_GPIO2_16_31, &IRQ_GPI06_INT1_Handler);
   NVIC_ENABLE_IRQ(IRQ_GPIO2_16_31);
 }
-
-  
-void loop() {
-  // Check for battery temperature high and low
-  if(car.BMS.getTemp() > PLACEHOLDER_VALUE){
-    NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT0);
-  }
-  
-  if (car.BMS.getTemp() < PLACEHOLDER_VALUE) {
-    NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT1);
-  }
-
-  // Check for no current and accelerator and brakes
-  if (car.BMS.getCurrent() < THRESHOLD_PLACEHOLDER) {
-    NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT2);
-  }
-  if (car.pedals.getAPPS() > 0.25 && (car.pedals.getBrakePressure1() > THRESHOLD || car.pedals.getBrakePressure2() > THRESHOLD_PLACEHOLDER)){
-    NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT3);
-  }
-
-  // Check for hard brake and unresponsive throttle
-  if (errObserver.hard_brake) {
-    NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT4);
-  }
-  if (errObserver.unresponsive_throttle) {
-    NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT5);
-  }
-
-  // Check for motor temperature low and no CAN signal
-  if (errObserver.motor_temp_low) {
-    NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT6);
-  }
-  if (errObserver.no_can_signal) {
-    NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT7);
-  }
-
-  // Check for current too high and system err
-  if (car.BMS.getCurrent()>THRESHOLD_PLACEHOLDER_CURR) {
-    NVIC_TRIGGER_IRQ(IRQ_GPIO1_0_15);
-  }
-  //????
-  if (errObserver.system_error) {
-    NVIC_TRIGGER_IRQ(IRQ_GPIO1_16_31);
-  }
-
-  // Check for insulation fault and car crash
-  if (car.IMD.getHardware_Error()) {
-    NVIC_TRIGGER_IRQ(IRQ_GPIO2_0_15);
-  }
-  if (errObserver.car_crash) {
-    NVIC_TRIGGER_IRQ(IRQ_GPIO2_16_31);
-  }
-
-  // Delay for a short period of time to prevent the loop from running too frequently
-  //delay(100); 
-}
-
 
 
   
