@@ -7,6 +7,8 @@
 #include "stubs.h"
 #include <string>
 
+// enum States {OFF, ON, ON_READY, DRIVE, CHARGE_PRECHARGE, CHARGE_CHARGING, CHARGE_FULL, FATAL_ERROR};
+
 
 volatile States state;
 //dash
@@ -20,66 +22,91 @@ volatile carFailure errObserver;
 
 
 void setup() {
+
+  //-------SET STATE------------
+
    state = OFF;
+
+  //------- ENABLE NVIC INTERRUPTS------
+
+  // Enable interrupts for battery temperature high 
+  attachInterruptVector(IRQ_GPIO1_INT0, &BatteryTempHigh_ISR);
+  NVIC_ENABLE_IRQ(IRQ_GPIO1_INT0);
+  
+  //battery temp low
+  attachInterruptVector(IRQ_GPIO1_INT1, &BatteryTempLow_ISR);
+  NVIC_ENABLE_IRQ(IRQ_GPIO1_INT1);
+
+  // Enable interrupts for no current 
+  attachInterruptVector(IRQ_GPIO1_INT2, &NoCurrent_ISR);
+  NVIC_ENABLE_IRQ(IRQ_GPIO1_INT2);
+
+  // APPS/BSPD accelerator and brakes
+  attachInterruptVector(IRQ_GPIO1_INT3, &APPSBSPDCheck_ISR);
+  NVIC_ENABLE_IRQ(IRQ_GPIO1_INT3);
+  
+  // Enable interrupts for hard brake 
+  attachInterruptVector(IRQ_GPIO1_INT4, &HardBrake_ISR);
+  NVIC_ENABLE_IRQ(IRQ_GPIO1_INT4);
+  
+  // unresponsive throttle
+  attachInterruptVector(IRQ_GPIO1_INT5, &UnresponsiveThrottle_ISR);
+  NVIC_ENABLE_IRQ(IRQ_GPIO1_INT5);
+  
+  // Enable interrupts for motor temperature high 
+  attachInterruptVector(IRQ_GPIO1_INT6, &MotorTempHigh_ISR);
+  NVIC_ENABLE_IRQ(IRQ_GPIO1_INT6);
+  
+  // no CAN signal
+  attachInterruptVector(IRQ_GPIO1_INT7, &NoCAN_ISR);
+  NVIC_ENABLE_IRQ(IRQ_GPIO1_INT7);
+  
+  // Enable interrupts for current too high 
+  attachInterruptVector(IRQ_GPIO1_0_15, &CurrentExceeds_ISR);
+  NVIC_ENABLE_IRQ(IRQ_GPIO1_0_15);
+  
+  // system error
+  attachInterruptVector(IRQ_GPIO1_16_31, &SystemError_ISR);
+  NVIC_ENABLE_IRQ(IRQ_GPIO1_16_31);
+  
+  // Enable interrupts for insulation fault
+  attachInterruptVector(IRQ_GPIO2_0_15, &IMDFault_ISR);
+  NVIC_ENABLE_IRQ(IRQ_GPIO2_0_15);
+  
+  // car crash
+  attachInterruptVector(IRQ_GPIO2_16_31, &CarCrashed_ISR);
+  NVIC_ENABLE_IRQ(IRQ_GPIO2_16_31);
 }
 
 void loop() {
+  bool batteryTempHigh = car.BMS.getTemp() > BAT_TEMP_MAX; 
+  bool batteryTempLow = car.BMS.getTemp() < BAT_TEMP_MIN;
+  bool noCurrent = car.DTI.getACCurrent() < MIN_CURRENT_THRESHOLD; // ?? TODO: FIX
+  bool APPSBSPDViolation = car.pedals.getAPPS() > 0.25 && (car.pedals.getBrakePressure1() > MIN_BRAKE_PRESSURE || car.pedals.getBrakePressure2() > MIN_BRAKE_PRESSURE);
+  bool hardBrake = car.pedals.getBrakePressure1() > HARD_BRAKE_LIMIT || car.pedals.getBrakePressure2() > HARD_BRAKE_LIMIT;
+  bool accelUnresponsive = car.pedals.getAPPS() > APPS_UNRESPONSIVE_MAX && car.DTI.getACCurrent() < MIN_RESPONSIVE_CURRENT_MOTOR;  //TODO LATER FIX THIS SHIT IT IS PROB WRONG
+  bool motorTempHigh = car.DTI.getMotorTemp() > MOT_TEMP_MAX;
+  bool CANFailure = !car.canSend; // IDK if this is right but seems right
+  bool currentExceeds = car.DTI.getACCurrent()> DTI_CURRENT_THRESHOLD;
+  bool systemError = true; //TODO: FIX THIS ACTUAL VALUE
+  bool IMDFault = car.IMD.getHardware_Error();
+  bool GForceCrash = sqrt(car.sensors.getLinAccelX()*car.sensors.getLinAccelX() +
+                            car.sensors.getLinAccelY()*car.sensors.getLinAccelY() +
+                              car.sensors.getLinAccelZ()*car.sensors.getLinAccelZ()) > G_FORCE_LIMIT;
 
 
-   // Check for battery temperature high and low
-  if(car.BMS.getTemp() > BAT_TEMP_MAX){
-    NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT0);
-  }
-  
-  if (car.BMS.getTemp() < BAT_TEMP_MIN) {
-    NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT1);
-  }
-
-  // Check for no current and accelerator and brakes
-  if (car.BMS.getCurrent() < NO_CURRENT) {
-    NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT2);
-  }
-  if (car.pedals.getAPPS() > 0.25 && (car.pedals.getBrakePressure1() > MIN_BRAKE_PRESSURE || car.pedals.getBrakePressure2() > MIN_BRAKE_PRESSURE)){
-    NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT3);
-  }
-
-  // Check for hard brake and unresponsive throttle
-  if (car.pedals.getBrakePressure1() > HARD_BRAKE_LIMIT || car.pedals.getBrakePressure2() > HARD_BRAKE_LIMIT) {
-    NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT4);
-  }
-  //FIX THIS SHIT IT IS PROB WRONG
-  if (car.pedals.getAPPS() > APPS_UNRESPONSIVE_MAX && car.DTI.getACCurrent() < MIN_CURRENT_MOTOR) {
-    NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT5);
-  }
-
-  // Check for motor temperature low 
-  if (car.DTI.getMotorTemp() < MIN_MOTOR_TEMP) {
-    NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT6);
-  }
-  //no CAN Signal
-  //FIX LATER IDK
-  if (!car.canSend) {
-    NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT7);
-  }
-
-  // Check for current too high and system err
-  if (car.BMS.getCurrent()>THRESHOLD_PLACEHOLDER_CURR) {
-    NVIC_TRIGGER_IRQ(IRQ_GPIO1_0_15);
-  }
-
-  //????
-  if (errObserver.system_error) {
-    NVIC_TRIGGER_IRQ(IRQ_GPIO1_16_31);
-  }
-
-  // Check for insulation fault and car crash
-  if (car.IMD.getHardware_Error()) {
-    NVIC_TRIGGER_IRQ(IRQ_GPIO2_0_15);
-  }
-  //
-  if (car.sensors.getLinAccelX() > THRESHOLD_G_FORCE) {
-    NVIC_TRIGGER_IRQ(IRQ_GPIO2_16_31);
-  }
+  if(batteryTempHigh){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT0);}
+  if(batteryTempLow){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT1);}
+  if(noCurrent){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT2);}
+  if(APPSBSPDViolation){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT3);}
+  if(hardBrake){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT4);}
+  if(accelUnresponsive){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT5);}
+  if(motorTempHigh){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT6);}
+  if(CANFailure){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT7);}
+  if(currentExceeds){NVIC_TRIGGER_IRQ(IRQ_GPIO1_0_15);}
+  if(systemError){NVIC_TRIGGER_IRQ(IRQ_GPIO1_16_31);}
+  if(IMDFault){NVIC_TRIGGER_IRQ(IRQ_GPIO2_0_15);}
+  if(GForceCrash){NVIC_TRIGGER_IRQ(IRQ_GPIO2_16_31);}
 
   // Delay for a short period of time to prevent the loop from running too frequently
   //delay(100); 
@@ -106,153 +133,45 @@ void loop() {
       case CHARGE_FULL:
          state = charge_full();
          break;
+      case ERROR:
+        break;
    }
 }
 
-// Variables to hold input states
-
 
 // Interrupt handler for battery temperature high
-void BatteryTempHighInterrupt() {
-
-}
+void BatteryTempHigh_ISR() {}
 
 // Interrupt handler for battery temperature low
-void IRQ_GPI01_INT1_Handler() {
-
-}
+void BatteryTempLow_ISR() {}
 
 // Interrupt handler for no current
-void IRQ_GPI02_INT0_Handler() {
-  
-}
+void NoCurrent_ISR() {}
 
 // Interrupt handler for accelerator and brakes
-void IRQ_GPI02_INT1_Handler() {
-  
-}
+void APPSBSPDCheck_ISR() {}
 
 // Interrupt handler for hard brake
-void IRQ_GPI03_INT0_Handler() {
-  
-}
+void HardBrake_ISR() {}
 
 // Interrupt handler for unresponsive throttle
-void IRQ_GPI03_INT1_Handler() {
+void UnresponsiveThrottle_ISR() {}
 
-}
-
-// Interrupt handler for motor temperature low
-void IRQ_GPI04_INT0_Handler() {
-
-}
+// Interrupt handler for motor temperature high
+void MotorTempHigh_ISR() {}
 
 // Interrupt handler for no CAN signal
-void IRQ_GPI04_INT1_Handler() {
-
-}
+void NoCAN_ISR() {}
 
 // Interrupt handler for current too high
-void IRQ_GPI05_INT0_Handler() {
+void CurrentExceeds_ISR() {}
 
-}
 // Interrupt handler for system error
-void IRQ_GPI05_INT1_Handler() {
-
-}
+void SystemError_ISR() {}
 
 // Interrupt handler for insulation fault
-void IRQ_GPI06_INT0_Handler() {
-
-}
+void IMDFault_ISR() {}
 
 // Interrupt handler for car crash
-void IRQ_GPI06_INT1_Handler() {
+void CarCrashed_ISR() {}
 
-}
-
-void setup() {
-  // Enable interrupts for battery temperature high and low
-  attachInterruptVector(IRQ_GPIO1_INT0, &BatteryTempHighInterrupt);
-  NVIC_ENABLE_IRQ(IRQ_GPIO1_INT0);
-  
-  attachInterruptVector(IRQ_GPIO1_INT1, &IRQ_GPI01_INT1_Handler);
-  NVIC_ENABLE_IRQ(IRQ_GPIO1_INT1);
-
-  // Enable interrupts for no current and accelerator and brakes
-  attachInterruptVector(IRQ_GPIO1_INT2, &IRQ_GPI02_INT0_Handler);
-  NVIC_ENABLE_IRQ(IRQ_GPIO1_INT2);
-  
-  attachInterruptVector(IRQ_GPIO1_INT3, &IRQ_GPI02_INT1_Handler);
-  NVIC_ENABLE_IRQ(IRQ_GPIO1_INT3);
-  
-  // Enable interrupts for hard brake and unresponsive throttle
-  attachInterruptVector(IRQ_GPIO1_INT4, &IRQ_GPI03_INT0_Handler);
-  NVIC_ENABLE_IRQ(IRQ_GPIO1_INT4);
-  
-  attachInterruptVector(IRQ_GPIO1_INT5, &IRQ_GPI03_INT1_Handler);
-  NVIC_ENABLE_IRQ(IRQ_GPIO1_INT5);
-  
-  // Enable interrupts for motor temperature low and no CAN signal
-  attachInterruptVector(IRQ_GPIO1_INT6, &IRQ_GPI04_INT0_Handler);
-  NVIC_ENABLE_IRQ(IRQ_GPIO1_INT6);
-  
-  attachInterruptVector(IRQ_GPIO1_INT7, &IRQ_GPI04_INT1_Handler);
-  NVIC_ENABLE_IRQ(IRQ_GPIO1_INT7);
-  
-  // Enable interrupts for current too high and system error
-  attachInterruptVector(IRQ_GPIO1_0_15, &IRQ_GPI05_INT0_Handler);
-  NVIC_ENABLE_IRQ(IRQ_GPIO1_0_15);
-  
-  attachInterruptVector(IRQ_GPIO1_16_31, &IRQ_GPI05_INT1_Handler);
-  NVIC_ENABLE_IRQ(IRQ_GPIO1_16_31);
-  
-  // Enable interrupts for insulation fault and car crash
-  attachInterruptVector(IRQ_GPIO2_0_15, &IRQ_GPI06_INT0_Handler);
-  NVIC_ENABLE_IRQ(IRQ_GPIO2_0_15);
-  
-  attachInterruptVector(IRQ_GPIO2_16_31, &IRQ_GPI06_INT1_Handler);
-  NVIC_ENABLE_IRQ(IRQ_GPIO2_16_31);
-}
-
-
-  
-
-
-
-
-
-// #include <Arduino.h>
-// #include <imxrt.h>
-
-// volatile int foo = 0;
-
-// void IRQ_GPI01_INT0_Handler() {
-  
-//   foo = 1;
-  
-// }
-
-// void setup() {
-  
-//   NVIC_ENABLE_IRQ(IRQ_GPIO1_INT0);
-//   attachInterruptVector(IRQ_GPIO1_INT0, &IRQ_GPI01_INT0_Handler);
-
-// }
-
-// void loop() {
-//   // generate a random integer between 0 and 5
-//   foo = random(6);
-
-//   // check if foo is greater than 1
-//   Serial.print("foo is ");
-//   Serial.print(foo);
-//   if (foo > 1) {
-//     // set the interrupt flag for PORTB in the NVIC
-//     NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT0);
-//   }
-//   Serial.print("foo is ");
-//   Serial.print(foo);
-
-//   delay(1000); // wait for 1 second
-// }
