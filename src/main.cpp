@@ -4,12 +4,20 @@
 #include "I_no_can_speak_flex.h"
 #include "main.h"
 #include "constants.h"
+#include "stubs.h"
+#include <string>
+
 
 volatile States state;
+//dash
+volatile bool sendToDash;
+//message to send to dash
+volatile std::string errMess;
 
-#include "stubs.h"
+I_no_can_speak_flex car(true);
+volatile carFailure errObserver;
 
-// #include "stubs.cpp"
+
 
 void setup() {
    state = OFF;
@@ -36,18 +44,21 @@ void loop() {
   }
 
   // Check for hard brake and unresponsive throttle
-  if (errObserver.hard_brake) {
+  if (car.pedals.getBrakePressure1() > HARD_BRAKE_LIMIT || car.pedals.getBrakePressure2() > HARD_BRAKE_LIMIT) {
     NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT4);
   }
-  if (errObserver.unresponsive_throttle) {
+  //FIX THIS SHIT IT IS PROB WRONG
+  if (car.pedals.getAPPS() > APPS_UNRESPONSIVE_MAX && car.DTI.getACCurrent() < MIN_CURRENT_MOTOR) {
     NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT5);
   }
 
-  // Check for motor temperature low and no CAN signal
-  if (errObserver.motor_temp_low) {
+  // Check for motor temperature low 
+  if (car.DTI.getMotorTemp() < MIN_MOTOR_TEMP) {
     NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT6);
   }
-  if (errObserver.no_can_signal) {
+  //no CAN Signal
+  //FIX LATER IDK
+  if (!car.canSend) {
     NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT7);
   }
 
@@ -65,7 +76,8 @@ void loop() {
   if (car.IMD.getHardware_Error()) {
     NVIC_TRIGGER_IRQ(IRQ_GPIO2_0_15);
   }
-  if (errObserver.car_crash) {
+  //
+  if (car.sensors.getLinAccelX() > THRESHOLD_G_FORCE) {
     NVIC_TRIGGER_IRQ(IRQ_GPIO2_16_31);
   }
 
@@ -99,8 +111,6 @@ void loop() {
 
 // Variables to hold input states
 
-I_no_can_speak_flex car(true);
-volatile carFailure errObserver;
 
 // Interrupt handler for battery temperature high
 void BatteryTempHighInterrupt() {
