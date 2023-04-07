@@ -25,6 +25,7 @@ States drive() {
    return CHARGE_PRECHARGE;
 }
 
+/*
 States charge_precharge() {
    Serial.println("4");
    return CHARGE_CHARGING;
@@ -39,3 +40,4 @@ States charge_full() {
    Serial.println("6");
    return OFF;
 }
+*/
