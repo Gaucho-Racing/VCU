@@ -3,7 +3,43 @@
 #include "utility.h"
 #include "I_no_can_speak_flex.h"
 #include "string"
+#include "main.h"
 
+volatile States state;
+
+#include "stubs.h"
+
+// #include "stubs.cpp"
+
+void setup() {
+   state = OFF;
+}
+
+void loop() {
+   switch (state) {
+      case OFF:
+         state = off();
+         break;
+      case ON:
+         state = on();
+         break;
+      case ON_READY:
+         state = on_ready();
+         break;
+      case DRIVE:
+         state = drive();
+         break;
+      case CHARGE_PRECHARGE:
+         state = charge_precharge();
+         break;
+      case CHARGE_CHARGING:
+         state = charge_charging();
+         break;
+      case CHARGE_FULL:
+         state = charge_full();
+         break;
+   }
+}
 
 // Variables to hold input states
 
@@ -11,8 +47,8 @@ I_no_can_speak_flex car(true);
 volatile carFailure errObserver;
 
 // Interrupt handler for battery temperature high
-void IRQ_GPI01_INT0_Handler() {
-  
+void BatteryTempHighInterrupt() {
+
 }
 
 // Interrupt handler for battery temperature low
@@ -86,7 +122,7 @@ void IRQ_GPI06_INT1_Handler() {
 
 void setup() {
   // Enable interrupts for battery temperature high and low
-  attachInterruptVector(IRQ_GPIO1_INT0, &IRQ_GPI01_INT0_Handler);
+  attachInterruptVector(IRQ_GPIO1_INT0, &BatteryTempHighInterrupt);
   NVIC_ENABLE_IRQ(IRQ_GPIO1_INT0);
   
   attachInterruptVector(IRQ_GPIO1_INT1, &IRQ_GPI01_INT1_Handler);
@@ -131,19 +167,19 @@ void setup() {
   
 void loop() {
   // Check for battery temperature high and low
-  if(errObserver.battery_temp_high){
+  if(car.BMS.getTemp() > PLACEHOLDER_VALUE){
     NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT0);
   }
   
-  if (errObserver.battery_temp_low) {
+  if (car.BMS.getTemp() < PLACEHOLDER_VALUE) {
     NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT1);
   }
 
   // Check for no current and accelerator and brakes
-  if (errObserver.no_current) {
+  if (car.BMS.getCurrent() < THRESHOLD_PLACEHOLDER) {
     NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT2);
   }
-  if (errObserver.accelerator_and_brakes) {
+  if (car.pedals.getAPPS() > 0.25 && (car.pedals.getBrakePressure1() > THRESHOLD || car.pedals.getBrakePressure2() > THRESHOLD_PLACEHOLDER)){
     NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT3);
   }
 
@@ -163,16 +199,17 @@ void loop() {
     NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT7);
   }
 
-  // Check for current too high and system error
-  if (errObserver.current_too_high) {
+  // Check for current too high and system err
+  if (car.BMS.getCurrent()>THRESHOLD_PLACEHOLDER_CURR) {
     NVIC_TRIGGER_IRQ(IRQ_GPIO1_0_15);
   }
+  //????
   if (errObserver.system_error) {
     NVIC_TRIGGER_IRQ(IRQ_GPIO1_16_31);
   }
 
   // Check for insulation fault and car crash
-  if (errObserver.insulation_fault) {
+  if (car.IMD.getHardware_Error()) {
     NVIC_TRIGGER_IRQ(IRQ_GPIO2_0_15);
   }
   if (errObserver.car_crash) {
