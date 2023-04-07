@@ -17,7 +17,7 @@ void IRQ_GPI01_INT0_Handler() {
 
 // Interrupt handler for battery temperature low
 void IRQ_GPI01_INT1_Handler() {
-  
+
 }
 
 // Interrupt handler for no current
