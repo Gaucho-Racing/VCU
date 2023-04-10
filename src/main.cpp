@@ -10,7 +10,6 @@
 
 // enum States {OFF, ON, ON_READY, DRIVE, CHARGE_PRECHARGE, CHARGE_CHARGING, CHARGE_FULL, FATAL_ERROR};
 
-
 volatile States state;
 //dash
 volatile bool sendToDash = false;
@@ -88,7 +87,6 @@ void loop() {
 // Interrupt handler for battery temperature high
 void BatteryTempHigh_ISR() {
    // Dissalow Charging
-   
    // Send Message to Dash
    const_cast<std::string&>(errMess).append("WARNING: CELL TEMPERATURE HIGH, LIMITING POWER DRAW.\n");
    // Limit Motor Current Draw
@@ -181,7 +179,9 @@ void IMDFault_ISR() {
 void CarCrashed_ISR() {
    // Dash Warning
    // Disengage motor
+   car.DTI.setCurrent(0);
    // Shut down car
+   
 
 }
 
