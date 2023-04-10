@@ -95,7 +95,7 @@ void BatteryTempHigh_ISR() {
    car.DTI.setMaxCurrent(OVERHEAT_CURRENT_LIMIT);
    // Shut down car if Very high
    if(car.BMS.getTemp() > CRITICAL_BATTERY_TEMP_HIGH){
-      const_cast<std::string&>(errMess).append("CRITICAL: CELL TEMP VERY HIGH, SHUTTING DOWN.")
+      const_cast<std::string&>(errMess).append("CRITICAL: CELL TEMP VERY HIGH, SHUTTING DOWN.");
       // state = OFF;
    }
 }
@@ -158,7 +158,9 @@ void NoCAN_ISR() {
 }
 
 // Interrupt handler for current too high
-void CurrentExceeds_ISR() {}
+void CurrentExceeds_ISR() {
+
+}
 
 // Interrupt handler for system error
 void SystemError_ISR() {
