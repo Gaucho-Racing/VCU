@@ -23,6 +23,6 @@ const int DTI_CURRENT_THRESHOLD = 0;
 const int G_FORCE_LIMIT = 0;
 const int OVERHEAT_CURRENT_LIMIT = 0;
 const int CRITICAL_BATTERY_TEMP_HIGH = 0;
-const int MAX_CURRENT_DRAW_HIGH_MOTOR;
+const int MAX_CURRENT_DRAW_HIGH_MOTOR = 0;
 
 #endif

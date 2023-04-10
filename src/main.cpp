@@ -26,13 +26,13 @@ volatile carFailure errObserver;
 void loop() {
   bool batteryTempHigh = car.BMS.getTemp() > BAT_TEMP_MAX; 
   bool batteryTempLow = car.BMS.getTemp() < BAT_TEMP_MIN;
-  bool noCurrent = car.DTI.getACCurrent() < MIN_CURRENT_THRESHOLD; // ?? TODO: FIX
+  bool noCurrent = car.DTI.getDCCurrent() < MIN_CURRENT_THRESHOLD; // ?? TODO: FIX
   bool APPSBSPDViolation = car.pedals.getAPPS() > 0.25 && (car.pedals.getBrakePressure1() > MIN_BRAKE_PRESSURE || car.pedals.getBrakePressure2() > MIN_BRAKE_PRESSURE);
   bool hardBrake = car.pedals.getBrakePressure1() > HARD_BRAKE_LIMIT || car.pedals.getBrakePressure2() > HARD_BRAKE_LIMIT;
-  bool accelUnresponsive = car.pedals.getAPPS() > APPS_UNRESPONSIVE_MAX && car.DTI.getACCurrent() < MIN_RESPONSIVE_CURRENT_MOTOR;  //TODO LATER FIX THIS SHIT IT IS PROB WRONG
+  bool accelUnresponsive = car.pedals.getAPPS() > APPS_UNRESPONSIVE_MAX && car.DTI.getDCCurrent() < MIN_RESPONSIVE_CURRENT_MOTOR;  //TODO LATER FIX THIS SHIT IT IS PROB WRONG
   bool motorTempHigh = car.DTI.getMotorTemp() > MOT_TEMP_MAX;
   bool CANFailure = !car.canSend; // IDK if this is right but seems right
-  bool currentExceeds = car.DTI.getACCurrent()> DTI_CURRENT_THRESHOLD;
+  bool currentExceeds = car.DTI.getDCCurrent()> DTI_CURRENT_THRESHOLD;
   bool systemError = true; //TODO: FIX THIS ACTUAL VALUE
   bool IMDFault = car.IMD.getHardware_Error();
   bool GForceCrash = sqrt(car.sensors.getLinAccelX()*car.sensors.getLinAccelX() +
@@ -147,7 +147,7 @@ void MotorTempHigh_ISR() {
    // IF very high, stop car
    if(car.DTI.getMotorTemp() > CRITICAL_MOTOR_TEMP){
       const_cast<std::string&>(errMess).append("CRITICAL: MOTOR TEMP VERY HIGH, SHUTTING DOWN\n");
-      car.DTI.setRCurrent(0);
+      car.DTI.setCurrent(0);
       //state off
    }
 }
