@@ -6,15 +6,16 @@
 #include "constants.h"
 #include "stubs.h"
 #include <string>
+// using namespace std;
 
 // enum States {OFF, ON, ON_READY, DRIVE, CHARGE_PRECHARGE, CHARGE_CHARGING, CHARGE_FULL, FATAL_ERROR};
 
 
 volatile States state;
 //dash
-volatile bool sendToDash;
+volatile bool sendToDash = false;
 //message to send to dash
-volatile std::string errMess;
+volatile std::string errMess = "";
 
 I_no_can_speak_flex car(true);
 volatile carFailure errObserver;
@@ -81,43 +82,106 @@ void loop() {
         break;
    }
 }
-
+//NOTE: 
+// might want to think about how we are going to restore certain settings once there isnt an error anymore. 
 
 // Interrupt handler for battery temperature high
-void BatteryTempHigh_ISR() {}
+void BatteryTempHigh_ISR() {
+   // Dissalow Charging
+   
+   // Send Message to Dash
+   const_cast<std::string&>(errMess).append("WARNING: CELL TEMPERATURE HIGH, LIMITING POWER DRAW.\n");
+   // Limit Motor Current Draw
+   car.DTI.setMaxCurrent(OVERHEAT_CURRENT_LIMIT);
+   // Shut down car if Very high
+   if(car.BMS.getTemp() > CRITICAL_BATTERY_TEMP_HIGH){
+      const_cast<std::string&>(errMess).append("CRITICAL: CELL TEMP VERY HIGH, SHUTTING DOWN.")
+      // state = OFF;
+   }
+}
 
 // Interrupt handler for battery temperature low
-void BatteryTempLow_ISR() {}
+void BatteryTempLow_ISR() {
+   // Dissalow Charging 
+   
+   // Send Message to Dash
+   const_cast<std::string&>(errMess).append("WARNING: CELL TEMPERATURE LOW.\n");
+   // SHut Down car if Very Low
+
+}
 
 // Interrupt handler for no current
-void NoCurrent_ISR() {}
+void NoCurrent_ISR() {
+   // Dashboard Warning Send
+   const_cast<std::string&>(errMess).append("WARNING: NO CURRENT TO DTI MC.\n");
+   // state OFF?
+}
 
 // Interrupt handler for accelerator and brakes
-void APPSBSPDCheck_ISR() {}
+void APPSBSPDCheck_ISR() {
+   // Disengage motor
+   car.DTI.setCurrent(0);
+   // Send message to Dash
+   const_cast<std::string&>(errMess).append("WARNING: POWER LIMITED: APPS/BSPD ENGAGED BRAKE & THROTTLE\n");
+}
 
 // Interrupt handler for hard brake
-void HardBrake_ISR() {}
+void HardBrake_ISR() {
+   // Disengage motor
+   car.DTI.setRCurrent(0);
+}
 
 // Interrupt handler for unresponsive throttle
-void UnresponsiveThrottle_ISR() {}
+void UnresponsiveThrottle_ISR() {
+   // Send Dash Warning
+   const_cast<std::string&>(errMess).append("CRITICAL: THROTTLE SIGNAL UNRESPONSIVE. FIX\n");
+   // state = OFF
+}
 
 // Interrupt handler for motor temperature high
-void MotorTempHigh_ISR() {}
+void MotorTempHigh_ISR() {
+   // Give dash warning
+   const_cast<std::string&>(errMess).append("WARNING: MOTOR TEMP HIGH, LIMITING POWER DRAW\n");
+   // Limit Motor Current draw
+   car.DTI.setMaxCurrent(MAX_CURRENT_DRAW_HIGH_MOTOR);
+   // IF very high, stop car
+   if(car.DTI.getMotorTemp() > CRITICAL_MOTOR_TEMP){
+      const_cast<std::string&>(errMess).append("CRITICAL: MOTOR TEMP VERY HIGH, SHUTTING DOWN\n");
+      car.DTI.setRCurrent(0);
+      //state off
+   }
+}
 
 // Interrupt handler for no CAN signal
-void NoCAN_ISR() {}
+void NoCAN_ISR() {
+   // IDK Shut down?
+}
 
 // Interrupt handler for current too high
 void CurrentExceeds_ISR() {}
 
 // Interrupt handler for system error
-void SystemError_ISR() {}
+void SystemError_ISR() {
+   //Disengage motor
+   //Stop charging (if charging)
+}
 
 // Interrupt handler for insulation fault
-void IMDFault_ISR() {}
+void IMDFault_ISR() {
+   // Give dash a critical warning
+   const_cast<std::string&>(errMess).append("CRITICAL: IMD FAULT CHASSIS POSSIBLY ENERGIZED. EXIT VEHICLE.\n");
+   // Shut Down car
+   car.DTI.setCurrent(0);
+
+}
 
 // Interrupt handler for car crash
-void CarCrashed_ISR() {}
+void CarCrashed_ISR() {
+   // Dash Warning
+   // Disengage motor
+   // Shut down car
+
+}
 
 
 void setup() {
