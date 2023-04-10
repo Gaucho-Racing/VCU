@@ -57,28 +57,26 @@ void loop() {
 
      switch (state) {
       case OFF:
-         state = off();
+         state = off(car);
          break;
       case ON:
-         state = on();
+         state = on(car);
          break;
       case ON_READY:
-         state = on_ready();
+         state = on_ready(car);
          break;
       case DRIVE:
-         state = drive();
+         state = drive(car);
          break;
       case CHARGE_PRECHARGE:
-         state = charge_precharge();
+         state = charge_precharge(car);
          break;
       case CHARGE_CHARGING:
-         state = charge_charging();
+         state = charge_charging(car);
          break;
       case CHARGE_FULL:
-         state = charge_full();
+         state = charge_full(car);
          break;
-      case ERROR:
-        break;
    }
 }
 //NOTE: 
