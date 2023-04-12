@@ -29,7 +29,7 @@ void loop() {
   bool batteryTempHigh = car.BMS.getTemp() > VALUE_BAT_TEMP_MAX; 
   bool batteryTempLow = car.BMS.getTemp() < VALUE_BAT_TEMP_MIN;
   bool noCurrent = car.DTI.getDCCurrent() < VALUE_MIN_CURRENT_THRESHOLD; // ?? TODO: FIX
-  bool APPSBSPDViolation = car.pedals.getAPPS() > 0.25 && (car.pedals.getBrakePressure1() > VALUE_MIN_BRAKE_PRESSURE || car.pedals.getBrakePressure2() > VALUE_MIN_BRAKE_PRESSURE);
+  bool APPSBSPDViolation = car.pedals.getAPPS() > VALUE_APPS_BSPD_THROTTLE && (car.pedals.getBrakePressure1() > VALUE_MIN_BRAKE_PRESSURE || car.pedals.getBrakePressure2() > VALUE_MIN_BRAKE_PRESSURE);
   bool hardBrake = car.pedals.getBrakePressure1() > VALUE_HARD_BRAKE_LIMIT || car.pedals.getBrakePressure2() > VALUE_HARD_BRAKE_LIMIT;
   bool accelUnresponsive = car.pedals.getAPPS() > VALUE_APPS_UNRESPONSIVE_MAX && car.DTI.getDCCurrent() < VALUE_MIN_RESPONSIVE_CURRENT_MOTOR;  //TODO LATER FIX THIS SHIT IT IS PROB WRONG
   bool motorTempHigh = car.DTI.getMotorTemp() > VALUE_MOT_TEMP_MAX;
@@ -108,7 +108,6 @@ struct CircularBuffer {
             i = (i + 1) % m_size;
         }
     }
-
     int m_size;
     std::vector<std::string> m_buffer;
     int m_head;
