@@ -1,12 +1,16 @@
 #include <Arduino.h>
 #include <imxrt.h>
 #include "utility.h"
-// #include "I_no_can_speak_flex.h"
 #include "main.h"
 #include "constants.h"
 #include "stubs.h"
 #include <string>
-// using namespace std;
+#include <map>
+#include <vector>
+#include <algorithm>
+#include <queue>
+#include <iostream>
+using namespace std;
 
 // enum States {OFF, ON, ON_READY, DRIVE, CHARGE_PRECHARGE, CHARGE_CHARGING, CHARGE_FULL, FATAL_ERROR};
 
@@ -14,8 +18,7 @@ volatile States state;
 //dash
 volatile bool sendToDash = false;
 //message to send to dash
-volatile std::string errMess = "";
-
+CircularBuffer errorBuffer(10);
 I_no_can_speak_flex car(true);
 volatile carFailure errObserver;
 
@@ -23,20 +26,20 @@ volatile carFailure errObserver;
 
 
 void loop() {
-  bool batteryTempHigh = car.BMS.getTemp() > BAT_TEMP_MAX; 
-  bool batteryTempLow = car.BMS.getTemp() < BAT_TEMP_MIN;
-  bool noCurrent = car.DTI.getDCCurrent() < MIN_CURRENT_THRESHOLD; // ?? TODO: FIX
-  bool APPSBSPDViolation = car.pedals.getAPPS() > 0.25 && (car.pedals.getBrakePressure1() > MIN_BRAKE_PRESSURE || car.pedals.getBrakePressure2() > MIN_BRAKE_PRESSURE);
-  bool hardBrake = car.pedals.getBrakePressure1() > HARD_BRAKE_LIMIT || car.pedals.getBrakePressure2() > HARD_BRAKE_LIMIT;
-  bool accelUnresponsive = car.pedals.getAPPS() > APPS_UNRESPONSIVE_MAX && car.DTI.getDCCurrent() < MIN_RESPONSIVE_CURRENT_MOTOR;  //TODO LATER FIX THIS SHIT IT IS PROB WRONG
-  bool motorTempHigh = car.DTI.getMotorTemp() > MOT_TEMP_MAX;
+  bool batteryTempHigh = car.BMS.getTemp() > VALUE_BAT_TEMP_MAX; 
+  bool batteryTempLow = car.BMS.getTemp() < VALUE_BAT_TEMP_MIN;
+  bool noCurrent = car.DTI.getDCCurrent() < VALUE_MIN_CURRENT_THRESHOLD; // ?? TODO: FIX
+  bool APPSBSPDViolation = car.pedals.getAPPS() > 0.25 && (car.pedals.getBrakePressure1() > VALUE_MIN_BRAKE_PRESSURE || car.pedals.getBrakePressure2() > VALUE_MIN_BRAKE_PRESSURE);
+  bool hardBrake = car.pedals.getBrakePressure1() > VALUE_HARD_BRAKE_LIMIT || car.pedals.getBrakePressure2() > VALUE_HARD_BRAKE_LIMIT;
+  bool accelUnresponsive = car.pedals.getAPPS() > VALUE_APPS_UNRESPONSIVE_MAX && car.DTI.getDCCurrent() < VALUE_MIN_RESPONSIVE_CURRENT_MOTOR;  //TODO LATER FIX THIS SHIT IT IS PROB WRONG
+  bool motorTempHigh = car.DTI.getMotorTemp() > VALUE_MOT_TEMP_MAX;
   bool CANFailure = !car.canSend; // IDK if this is right but seems right
-  bool currentExceeds = car.DTI.getDCCurrent()> DTI_CURRENT_THRESHOLD;
+  bool currentExceeds = car.DTI.getDCCurrent()> VALUE_DTI_CURRENT_THRESHOLD;
   bool systemError = true; //TODO: FIX THIS ACTUAL VALUE
   bool IMDFault = car.IMD.getHardware_Error();
   bool GForceCrash = sqrt(car.sensors.getLinAccelX()*car.sensors.getLinAccelX() +
                             car.sensors.getLinAccelY()*car.sensors.getLinAccelY() +
-                              car.sensors.getLinAccelZ()*car.sensors.getLinAccelZ()) > G_FORCE_LIMIT;
+                              car.sensors.getLinAccelZ()*car.sensors.getLinAccelZ()) > VALUE_G_FORCE_LIMIT;
 
 
   if(batteryTempHigh){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT0);}
@@ -78,20 +81,52 @@ void loop() {
          state = charge_full(car);
          break;
    }
+
+   // print out the errors from the buffer
+   errorBuffer.printMessages();
 }
+
+
 //NOTE: 
 // might want to think about how we are going to restore certain settings once there isnt an error anymore. 
+
+// I Changed the way we are outputting messages to use a circular buffer to avoid high memory usage from many strings
+struct CircularBuffer {
+    CircularBuffer(int size) : m_size(size), m_buffer(size), m_head(0) {}
+
+    void addMessage(std::string message) {
+        m_buffer[m_head] = message;
+        m_head = (m_head + 1) % m_size;
+    }
+
+    void printMessages() {
+        int i = m_head;
+        for (int j = 0; j < m_size; j++) {
+            if (!m_buffer[i].empty()) {
+                std::cout << m_buffer[i] << std::endl;
+            }
+            i = (i + 1) % m_size;
+        }
+    }
+
+    int m_size;
+    std::vector<std::string> m_buffer;
+    int m_head;
+};
+
+
 
 // Interrupt handler for battery temperature high
 void BatteryTempHigh_ISR() {
    // Dissalow Charging
+   
    // Send Message to Dash
-   const_cast<std::string&>(errMess).append("WARNING: CELL TEMPERATURE HIGH, LIMITING POWER DRAW.\n");
+   errorBuffer.addMessage(ERROR_HIGH_CELL_TEMP);
    // Limit Motor Current Draw
-   car.DTI.setMaxCurrent(OVERHEAT_CURRENT_LIMIT);
+   car.DTI.setMaxCurrent(VALUE_OVERHEAT_CURRENT_LIMIT);
    // Shut down car if Very high
-   if(car.BMS.getTemp() > CRITICAL_BATTERY_TEMP_HIGH){
-      const_cast<std::string&>(errMess).append("CRITICAL: CELL TEMP VERY HIGH, SHUTTING DOWN.");
+   if(car.BMS.getTemp() > VALUE_CRITICAL_BATTERY_TEMP_HIGH){
+      errorBuffer.addMessage(ERROR_CRITICAL_CELL_TEMP);
       // state = OFF;
    }
 }
@@ -101,7 +136,7 @@ void BatteryTempLow_ISR() {
    // Dissalow Charging 
    
    // Send Message to Dash
-   const_cast<std::string&>(errMess).append("WARNING: CELL TEMPERATURE LOW.\n");
+   errorBuffer.addMessage(ERROR_LOW_CELL_TEMP);
    // SHut Down car if Very Low
 
 }
@@ -109,7 +144,7 @@ void BatteryTempLow_ISR() {
 // Interrupt handler for no current
 void NoCurrent_ISR() {
    // Dashboard Warning Send
-   const_cast<std::string&>(errMess).append("WARNING: NO CURRENT TO DTI MC.\n");
+   errorBuffer.addMessage(ERROR_NO_CURRENT_DTI);
    // state OFF?
 }
 
@@ -118,7 +153,7 @@ void APPSBSPDCheck_ISR() {
    // Disengage motor
    car.DTI.setCurrent(0);
    // Send message to Dash
-   const_cast<std::string&>(errMess).append("WARNING: POWER LIMITED: APPS/BSPD ENGAGED BRAKE & THROTTLE\n");
+   errorBuffer.addMessage(ERROR_APPS_BSPD);
 }
 
 // Interrupt handler for hard brake
@@ -130,19 +165,19 @@ void HardBrake_ISR() {
 // Interrupt handler for unresponsive throttle
 void UnresponsiveThrottle_ISR() {
    // Send Dash Warning
-   const_cast<std::string&>(errMess).append("CRITICAL: THROTTLE SIGNAL UNRESPONSIVE. FIX\n");
+   errorBuffer.addMessage(ERROR_THROTTLE_SIGNAL);
    // state = OFF
 }
 
 // Interrupt handler for motor temperature high
 void MotorTempHigh_ISR() {
    // Give dash warning
-   const_cast<std::string&>(errMess).append("WARNING: MOTOR TEMP HIGH, LIMITING POWER DRAW\n");
+   errorBuffer.addMessage(ERROR_MOTOR_TEMP);
    // Limit Motor Current draw
-   car.DTI.setMaxCurrent(MAX_CURRENT_DRAW_HIGH_MOTOR);
+   car.DTI.setMaxCurrent(VALUE_MAX_CURRENT_DRAW_HIGH_MOTOR);
    // IF very high, stop car
-   if(car.DTI.getMotorTemp() > CRITICAL_MOTOR_TEMP){
-      const_cast<std::string&>(errMess).append("CRITICAL: MOTOR TEMP VERY HIGH, SHUTTING DOWN\n");
+   if(car.DTI.getMotorTemp() > VALUE_CRITICAL_MOTOR_TEMP){
+      errorBuffer.addMessage(ERROR_CRITICAL_MOTOR_TEMP);
       car.DTI.setCurrent(0);
       //state off
    }
@@ -167,8 +202,8 @@ void SystemError_ISR() {
 // Interrupt handler for insulation fault
 void IMDFault_ISR() {
    // Give dash a critical warning
-   const_cast<std::string&>(errMess).append("CRITICAL: IMD FAULT CHASSIS POSSIBLY ENERGIZED. EXIT VEHICLE.\n");
-   // Shut Down car
+   errorBuffer.addMessage(ERROR_IMD_FAULT);
+   // Shut Down carß
    car.DTI.setCurrent(0);
 
 }
@@ -176,6 +211,8 @@ void IMDFault_ISR() {
 // Interrupt handler for car crash
 void CarCrashed_ISR() {
    // Dash Warning
+   errorBuffer.addMessage("Rip.");
+
    // Disengage motor
    car.DTI.setCurrent(0);
    // Shut down car
