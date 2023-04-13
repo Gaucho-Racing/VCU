@@ -1,18 +1,13 @@
 //main.cpp
 //@rt.z, 0303
 
-#include <Arduino.h>
+#include "main.h"
 
-enum States {ERROR, OFF, ON, ON_READY, DRIVE, CHARGE_PRECHARGE, CHARGE_CHARGING, CHARGE_FULL};
 volatile States state;
 
-//includes commended out until the actual files are ready
-#include "on.cpp"
-#include "off.cpp"
-#include "on_ready.cpp"
-//#include "FULL.cpp"
-//#include "PRECHARGE.cpp"
-//#include "CHARGING.cpp"
+#include "stubs.h"
+I_no_can_speak_flex car(true);
+
 
 void setup() {
    state = OFF;
@@ -21,18 +16,25 @@ void setup() {
 void loop() {
    switch (state) {
       case OFF:
-         state = OFF();
+         state = off(car);
+         break;
       case ON:
-         state = ON();
+         state = on(car);
+         break;
       case ON_READY:
-         state = ON_READY();
+         state = on_ready(car);
+         break;
       case DRIVE:
-         state = DRIVE();
+         state = drive(car);
+         break;
       case CHARGE_PRECHARGE:
-         state = CHARGE_PRECHARGE();
+         state = charge_precharge(car);
+         break;
       case CHARGE_CHARGING:
-         state = CHARGE_CHARGING();
+         state = charge_charging(car);
+         break;
       case CHARGE_FULL:
-         state = CHARGE_FULL();
+         state = charge_full(car);
+         break;
    }
 }
