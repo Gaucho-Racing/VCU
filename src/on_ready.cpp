@@ -1,14 +1,15 @@
 // on_ready.cpp
 
-States ON_READY() {
+#include "main.h"
+#include "onOffUtility.h"
+
+States on_ready(I_no_can_speak_flex &car) {
     while(1) {
-         // global variable motorOutput
          //motorOutput = 0;
-         setRCurrent(0);
-         // Get necessary data
+         car.DTI.setRCurrent(0);
          // if drive mode engaged
-         if(drive()) {
-            return MOTOR_OFF;
+         if(driveEngaged(car)) {
+            return DRIVE;
          }
     }
 }

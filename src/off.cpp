@@ -1,20 +1,21 @@
 //off.cpp
-#include "onOffUtility.cpp"
+#include "onOffUtility.h"
 //#include file with the enums
+#include "main.h"
 
 // Starts at this state when the car is unlocked
-States OFF() {
+States off(I_no_can_speak_flex &car) {
     while(1) {
         // Start power to necessary things 
         // Get whether on or off (some function) (see below if statement) 
-        if(onPressed()){
+        if(onPressed(car)){
             return ON;
         }
-        if(getCurrent() > 0){
+        if(car.BMS.getCurrent() > 0){
             return CHARGE_PRECHARGE;
         } 
         
-        currentState = OFF;
+        //currentState = OFF; //not needed?
         // No default return value ?
     }
 }

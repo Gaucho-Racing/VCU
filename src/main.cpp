@@ -8,7 +8,6 @@ volatile States state;
 #include "stubs.h"
 I_no_can_speak_flex car(true);
 
-
 void setup() {
    state = OFF;
 }
