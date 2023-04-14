@@ -15,6 +15,27 @@ using namespace std;
 
 // enum States {OFF, ON, ON_READY, DRIVE, CHARGE_PRECHARGE, CHARGE_CHARGING, CHARGE_FULL, FATAL_ERROR};
 
+
+struct CircularBuffer {
+    CircularBuffer(int size) : m_size(size), m_buffer(size), m_head(0) {}
+    void addMessage(std::string message) {
+        m_buffer[m_head] = message;
+        m_head = (m_head + 1) % m_size;
+    }
+    void printMessages() {
+        int i = m_head;
+        for (int j = 0; j < m_size; j++) {
+            if (!m_buffer[i].empty()) {
+                std::cout << m_buffer[i] << std::endl;
+            }
+            i = (i + 1) % m_size;
+        }
+    }
+    int m_size;
+    std::vector<std::string> m_buffer;
+    int m_head;
+};
+
 volatile States state;
 //stores
 volatile States prevState; 
@@ -22,6 +43,7 @@ volatile States prevState;
 volatile bool sendToDash = false;
 volatile bool (*errorCheck)(void); 
 //message to send to dash
+
 CircularBuffer errorBuffer(10);
 I_no_can_speak_flex car(true);
 
@@ -96,35 +118,12 @@ void loop() {
 //NOTE: 
 // might want to think about how we are going to restore certain settings once there isnt an error anymore. 
 
-// I Changed the way we are outputting messages to use a circular buffer to avoid high memory usage from many strings
-struct CircularBuffer {
-    CircularBuffer(int size) : m_size(size), m_buffer(size), m_head(0) {}
-
-    void addMessage(std::string message) {
-        m_buffer[m_head] = message;
-        m_head = (m_head + 1) % m_size;
-    }
-
-    void printMessages() {
-        int i = m_head;
-        for (int j = 0; j < m_size; j++) {
-            if (!m_buffer[i].empty()) {
-                std::cout << m_buffer[i] << std::endl;
-            }
-            i = (i + 1) % m_size;
-        }
-    }
-    int m_size;
-    std::vector<std::string> m_buffer;
-    int m_head;
-};
 
 
 
 // Interrupt handler for battery temperature high
 void BatteryTempHigh_ISR() {
    // Dissalow Charging
-   
    // Send Message to Dash
    errorBuffer.addMessage(ERROR_HIGH_CELL_TEMP);
    // Limit Motor Current Draw
@@ -132,25 +131,22 @@ void BatteryTempHigh_ISR() {
    // Shut down car if Very high
    if(car.BMS.getTemp() > VALUE_CRITICAL_BATTERY_TEMP_HIGH){
       errorBuffer.addMessage(ERROR_CRITICAL_CELL_TEMP);
-      // state = OFF;
+      state = ERROR;
    }
 }
 
 // Interrupt handler for battery temperature low
 void BatteryTempLow_ISR() {
-   // Dissalow Charging 
-   
    // Send Message to Dash
    errorBuffer.addMessage(ERROR_LOW_CELL_TEMP);
-   // SHut Down car if Very Low
-
+   state = ERROR;
 }
 
 // Interrupt handler for no current
 void NoCurrent_ISR() {
    // Dashboard Warning Send
    errorBuffer.addMessage(ERROR_NO_CURRENT_DTI);
-   // state OFF?
+   state = ERROR;
 }
 
 // Interrupt handler for accelerator and brakes
@@ -159,19 +155,21 @@ void APPSBSPDCheck_ISR() {
    car.DTI.setCurrent(0);
    // Send message to Dash
    errorBuffer.addMessage(ERROR_APPS_BSPD);
+   
 }
 
 // Interrupt handler for hard brake
 void HardBrake_ISR() {
    // Disengage motor
    car.DTI.setRCurrent(0);
+   state = ERROR;
 }
 
 // Interrupt handler for unresponsive throttle
 void UnresponsiveThrottle_ISR() {
    // Send Dash Warning
    errorBuffer.addMessage(ERROR_THROTTLE_SIGNAL);
-   // state = OFF
+   state = ERROR;
 }
 
 // Interrupt handler for motor temperature high
@@ -184,7 +182,7 @@ void MotorTempHigh_ISR() {
    if(car.DTI.getMotorTemp() > VALUE_CRITICAL_MOTOR_TEMP){
       errorBuffer.addMessage(ERROR_CRITICAL_MOTOR_TEMP);
       car.DTI.setCurrent(0);
-      //state off
+      state = ERROR;
    }
 }
 
@@ -195,13 +193,14 @@ void NoCAN_ISR() {
 
 // Interrupt handler for current too high
 void CurrentExceeds_ISR() {
-
+   errorBuffer.addMessage("CRITICAL: CURRENT LIMIT EXCEEDED");
+   state = ERROR;
 }
 
 // Interrupt handler for system error
 void SystemError_ISR() {
-   //Disengage motor
-   //Stop charging (if charging)
+   cout << "TEST";
+   state = ERROR;
 }
 
 // Interrupt handler for insulation fault
@@ -221,7 +220,7 @@ void CarCrashed_ISR() {
    // Disengage motor
    car.DTI.setCurrent(0);
    // Shut down car
-   
+   state = ERROR;
 
 }
 
