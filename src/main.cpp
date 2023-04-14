@@ -15,7 +15,6 @@ using namespace std;
 
 // enum States {OFF, ON, ON_READY, DRIVE, CHARGE_PRECHARGE, CHARGE_CHARGING, CHARGE_FULL, FATAL_ERROR};
 
-
 struct CircularBuffer {
     CircularBuffer(int size) : m_size(size), m_buffer(size), m_head(0) {}
     void addMessage(std::string message) {
@@ -39,7 +38,6 @@ struct CircularBuffer {
 volatile States state;
 //stores
 volatile States prevState; 
-//dash
 volatile bool sendToDash = false;
 volatile bool (*errorCheck)(void); 
 //message to send to dash
@@ -47,39 +45,17 @@ volatile bool (*errorCheck)(void);
 CircularBuffer errorBuffer(10);
 I_no_can_speak_flex car(true);
 
-volatile bool batteryTempHigh(){
-      return car.BMS.getTemp() > VALUE_BAT_TEMP_MAX;
-  }
-  volatile bool batteryTempLow(){
-      return car.BMS.getTemp() < VALUE_BAT_TEMP_MIN;
-  }
-  volatile bool noCurrent(){
-      return car.DTI.getDCCurrent() < VALUE_MIN_CURRENT_THRESHOLD; // ?? TODO: FIX
-   }
-  volatile bool APPSBSPDViolation(){
-      return car.pedals.getAPPS() > VALUE_APPS_BSPD_THROTTLE && (car.pedals.getBrakePressure1() > VALUE_MIN_BRAKE_PRESSURE || car.pedals.getBrakePressure2() > VALUE_MIN_BRAKE_PRESSURE);
-   }
-  volatile bool hardBrake(){
-      return car.pedals.getBrakePressure1() > VALUE_HARD_BRAKE_LIMIT || car.pedals.getBrakePressure2() > VALUE_HARD_BRAKE_LIMIT;
-   }
-  volatile bool accelUnresponsive(){
-      return car.pedals.getAPPS() > VALUE_APPS_UNRESPONSIVE_MAX && car.DTI.getDCCurrent() < VALUE_MIN_RESPONSIVE_CURRENT_MOTOR;
-   }  //TODO LATER FIX THIS SHIT IT IS PROB WRONG
-  volatile bool motorTempHigh(){
-      return car.DTI.getMotorTemp() > VALUE_MOT_TEMP_MAX;
-   }
-  volatile bool CANFailure(){
-      return !car.canSend; // IDK if this is right but seems right
-   }
-  volatile bool currentExceeds(){
-      return car.DTI.getDCCurrent()> VALUE_DTI_CURRENT_THRESHOLD;
-   }
-  volatile bool systemError(){
-      return true; //TODO: FIX THIS ACTUAL VALUE
-   }
-  volatile bool IMDFault(){
-      return car.IMD.getHardware_Error();
-   }
+volatile bool batteryTempHigh(){ return car.BMS.getTemp() > VALUE_BAT_TEMP_MAX; }
+  volatile bool batteryTempLow(){return car.BMS.getTemp() < VALUE_BAT_TEMP_MIN;}
+  volatile bool noCurrent(){return car.DTI.getDCCurrent() < VALUE_MIN_CURRENT_THRESHOLD; }
+  volatile bool APPSBSPDViolation(){return car.pedals.getAPPS() > VALUE_APPS_BSPD_THROTTLE && (car.pedals.getBrakePressure1() > VALUE_MIN_BRAKE_PRESSURE || car.pedals.getBrakePressure2() > VALUE_MIN_BRAKE_PRESSURE);}
+  volatile bool hardBrake(){return car.pedals.getBrakePressure1() > VALUE_HARD_BRAKE_LIMIT || car.pedals.getBrakePressure2() > VALUE_HARD_BRAKE_LIMIT;}
+  volatile bool accelUnresponsive(){return car.pedals.getAPPS() > VALUE_APPS_UNRESPONSIVE_MAX && car.DTI.getDCCurrent() < VALUE_MIN_RESPONSIVE_CURRENT_MOTOR;} //TODO LATER FIX THIS SHIT IT IS PROB WRONG
+  volatile bool motorTempHigh(){return car.DTI.getMotorTemp() > VALUE_MOT_TEMP_MAX;}
+  volatile bool CANFailure(){return !car.canSend;  }// IDK if this is right but seems right
+  volatile bool currentExceeds(){ return car.DTI.getDCCurrent()> VALUE_DTI_CURRENT_THRESHOLD; }
+  volatile bool systemError(){ return true; } //TODO: FIX THIS ACTUAL VALUE
+  volatile bool IMDFault(){ return car.IMD.getHardware_Error();}
   volatile bool GForceCrash(){
       return sqrt(car.sensors.getLinAccelX()*car.sensors.getLinAccelX() +
                             car.sensors.getLinAccelY()*car.sensors.getLinAccelY() +
