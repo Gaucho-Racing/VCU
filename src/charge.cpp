@@ -3,14 +3,14 @@
 
 #include "main.h"
 
-States charge_precharge() {
+States charge_precharge(I_no_can_speak_flex &car) {
    /* interrupts logic, @nikunjparasar please include */
    delay(4000);
    // loop get data/interrupt check 
    return CHARGE_CHARGING;
 }
 
-States charge_charging() {
+States charge_charging(I_no_can_speak_flex &car) {
    while (1) {
       car.DTI.setRCurrent(0);
       // get data
@@ -20,7 +20,7 @@ States charge_charging() {
    }
 }
 
-States charge_full() {
+States charge_full(I_no_can_speak_flex &car) {
    while (1) {
       // get data
       car.DTI.setRCurrent(0);
