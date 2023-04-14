@@ -2,6 +2,7 @@
 #include <imxrt.h>
 #include "utility.h"
 #include "main.h"
+#include "error.h"
 #include "constants.h"
 #include "stubs.h"
 #include <string>
@@ -15,12 +16,14 @@ using namespace std;
 // enum States {OFF, ON, ON_READY, DRIVE, CHARGE_PRECHARGE, CHARGE_CHARGING, CHARGE_FULL, FATAL_ERROR};
 
 volatile States state;
+//stores
+volatile States prevState; 
 //dash
 volatile bool sendToDash = false;
+volatile bool (*errorCheck)(void); 
 //message to send to dash
 CircularBuffer errorBuffer(10);
 I_no_can_speak_flex car(true);
-volatile carFailure errObserver;
 
 
 
@@ -79,6 +82,9 @@ void loop() {
          break;
       case CHARGE_FULL:
          state = charge_full(car);
+         break;
+      case ERROR:
+         state = error(car);
          break;
    }
 
@@ -217,6 +223,12 @@ void CarCrashed_ISR() {
    // Shut down car
    
 
+}
+
+States sendToError(volatile States currentState, volatile bool (*erFunc)(void)){
+   errorCheck = erFunc; 
+   prevState = currentState; 
+   return ERROR;
 }
 
 
