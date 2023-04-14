@@ -128,7 +128,7 @@ void loop() {
 
 // Interrupt handler for battery temperature high
 void BatteryTempHigh_ISR() {
-   // Dissalow Charging
+   // Disallow Charging
    // Send Message to Dash
    errorBuffer.addMessage(ERROR_HIGH_CELL_TEMP);
    // Limit Motor Current Draw
