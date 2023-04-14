@@ -260,5 +260,5 @@ std::vector<int> systemsCheck(I_no_can_speak_flex &car) {
 
 bool driveEngaged(I_no_can_speak_flex &car) {
     //TODO: find how to get dash signals from the CAN
-    return false;
+    return true;
 }
