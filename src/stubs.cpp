@@ -5,6 +5,7 @@
 
 #include "stubs.h"
 
+/*
 States off(I_no_can_speak_flex &car) {
    Serial.println("0");
    return ON;
@@ -19,6 +20,7 @@ States on_ready(I_no_can_speak_flex &car) {
    Serial.println("2");
    return DRIVE;
 }
+*/
 
 States drive(I_no_can_speak_flex &car) {
    Serial.println("3");
