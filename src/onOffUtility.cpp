@@ -13,10 +13,7 @@ bool onPressed(I_no_can_speak_flex &car) {
 
 std::vector<int> systemsCheck(I_no_can_speak_flex &car) {
     std::vector<int> crit_codes;
-
-    //TODO - insert acutal code
     //make sure the data works
-    //outputs error message depending on what the error is
 
     //100: Unable to revieve CAN packets
     if ((car.DTI.getAge()) > 1000) crit_codes.push_back(100);
