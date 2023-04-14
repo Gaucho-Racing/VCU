@@ -5,22 +5,22 @@
 
 #include "stubs.h"
 
-States off() {
+States off(I_no_can_speak_flex &car) {
    Serial.println("0");
    return ON;
 }
 
-States on() {
+States on(I_no_can_speak_flex &car) {
    Serial.println("1");
    return ON_READY;
 }
 
-States on_ready() {
+States on_ready(I_no_can_speak_flex &car) {
    Serial.println("2");
    return DRIVE;
 }
 
-States drive() {
+States drive(I_no_can_speak_flex &car) {
    Serial.println("3");
    return CHARGE_PRECHARGE;
 }
@@ -31,12 +31,12 @@ States charge_precharge() {
    return CHARGE_CHARGING;
 }
 
-States charge_charging() {
+States charge_charging(I_no_can_speak_flex &car) {
    Serial.println("5");
    return CHARGE_FULL;
 }
 
-States charge_full() {
+States charge_full(I_no_can_speak_flex &car) {
    Serial.println("6");
    return OFF;
 }
