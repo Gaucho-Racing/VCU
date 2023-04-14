@@ -1,5 +1,5 @@
 //main.cpp
-// @rt.z
+//@rt.z, 0303
 
 #include "main.h"
 
@@ -7,7 +7,6 @@ volatile States state;
 
 #include "stubs.h"
 I_no_can_speak_flex car(true);
-
 
 void setup() {
    state = OFF;
