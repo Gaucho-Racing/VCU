@@ -9,14 +9,14 @@
 //check for all conditions to allow for ON_READY
 States on(I_no_can_speak_flex &car) {
    car.DTI.setRCurrent(0);
-   bool* systems_check = systemsCheck(car);
-   for (int i = 0; i < 100; i++) {
-      if (systems_check[i]) {
-         //throw interrupt
-         return OFF; //stub
-      }
+   std::vector<int> systems_check = systemsCheck(car);
+   bool error_detected = 0;
+   for (int code : systems_check) {
+      if (code >= 100) error_detected = 1;
+      //that can command to send it over…
    }
-   return ON_READY;
+   if (error_detected) return ERROR;
+   else return ON_READY;
 
    /*
    if(!systemsCheck(car)) { //if it returns zero, we move to ON_READY
