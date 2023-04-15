@@ -13,54 +13,113 @@
 #include <iostream>
 using namespace std;
 
-// enum States {OFF, ON, ON_READY, DRIVE, CHARGE_PRECHARGE, CHARGE_CHARGING, CHARGE_FULL, FATAL_ERROR};
-
-struct CircularBuffer {
-    CircularBuffer(int size) : m_size(size), m_buffer(size), m_head(0) {}
-    void addMessage(std::string message) {
-        m_buffer[m_head] = message;
-        m_head = (m_head + 1) % m_size;
-    }
-    void printMessages() {
-        int i = m_head;
-        for (int j = 0; j < m_size; j++) {
-            if (!m_buffer[i].empty()) {
-                std::cout << m_buffer[i] << std::endl;
-            }
-            i = (i + 1) % m_size;
-        }
-    }
-    int m_size;
-    std::vector<std::string> m_buffer;
-    int m_head;
-};
-
 volatile States state;
 //stores
 volatile States prevState; 
 volatile bool sendToDash = false;
 volatile bool (*errorCheck)(void); 
-//message to send to dash
-
-CircularBuffer errorBuffer(10);
 I_no_can_speak_flex car(true);
 
-volatile bool batteryTempHigh(){ return car.BMS.getTemp() > VALUE_BAT_TEMP_MAX; }
-  volatile bool batteryTempLow(){return car.BMS.getTemp() < VALUE_BAT_TEMP_MIN;}
-  volatile bool noCurrent(){return car.DTI.getDCCurrent() < VALUE_MIN_CURRENT_THRESHOLD; }
-  volatile bool APPSBSPDViolation(){return car.pedals.getAPPS() > VALUE_APPS_BSPD_THROTTLE && (car.pedals.getBrakePressure1() > VALUE_MIN_BRAKE_PRESSURE || car.pedals.getBrakePressure2() > VALUE_MIN_BRAKE_PRESSURE);}
-  volatile bool hardBrake(){return car.pedals.getBrakePressure1() > VALUE_HARD_BRAKE_LIMIT || car.pedals.getBrakePressure2() > VALUE_HARD_BRAKE_LIMIT;}
-  volatile bool accelUnresponsive(){return car.pedals.getAPPS() > VALUE_APPS_UNRESPONSIVE_MAX && car.DTI.getDCCurrent() < VALUE_MIN_RESPONSIVE_CURRENT_MOTOR;} //TODO LATER FIX THIS SHIT IT IS PROB WRONG
-  volatile bool motorTempHigh(){return car.DTI.getMotorTemp() > VALUE_MOT_TEMP_MAX;}
-  volatile bool CANFailure(){return !car.canSend;  }// IDK if this is right but seems right
-  volatile bool currentExceeds(){ return car.DTI.getDCCurrent()> VALUE_DTI_CURRENT_THRESHOLD; }
-  volatile bool systemError(){ return true; } //TODO: FIX THIS ACTUAL VALUE
-  volatile bool IMDFault(){ return car.IMD.getHardware_Error();}
-  volatile bool GForceCrash(){
-      return sqrt(car.sensors.getLinAccelX()*car.sensors.getLinAccelX() +
-                            car.sensors.getLinAccelY()*car.sensors.getLinAccelY() +
-                              car.sensors.getLinAccelZ()*car.sensors.getLinAccelZ()) > VALUE_G_FORCE_LIMIT;
-   }
+
+/*
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        
+                WARNINGS, DASH ONLY ERRORS NO RESOLUTION
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
+
+//Check Warnings for Tires and Suspension. 
+void TS_WARN_Check(){
+   // TIRE PRESSURES AND TEMPERATURES
+
+   //51: Front-right tire tempaerture too high
+   if (car.sensors.getFRtemp1() > 90) car.sendDashError(51);
+   //52: Front-right tire temperature too low
+   if (car.sensors.getFRtemp1() < 10) car.sendDashError(52);
+   //53: Front-right brake temperature too high
+   if (car.sensors.getFRtemp2() > 450) car.sendDashError(53);
+   //54: Front-right brake temperature too low
+   if (car.sensors.getFRtemp2() <= 0) car.sendDashError(54);
+   //55: Overengaged suspension
+   if (car.sensors.getFRtravel() > 1) car.sendDashError(55);
+   //56: Underengaged suspension
+   if (car.sensors.getFRtravel() < -1) car.sendDashError(56);
+   //58: High Front-right tire pressure
+   if (car.sensors.getFRpsi() > 50) car.sendDashError(58);
+   //59: Low Front-right tire pressure
+   if (car.sensors.getFRpsi() < 24) car.sendDashError(59);
+
+   //61: Front-left tire tempaerture too high
+   if (car.sensors.getFLtemp1() > 90) car.sendDashError(61);
+   //62: Front-left tire temperature too low
+   if (car.sensors.getFLtemp1() < 10) car.sendDashError(62);
+   //63: Front-left brake temperature too high
+   if (car.sensors.getFLtemp2() > 450) car.sendDashError(63);
+   //64: Front-left brake temperature too low
+   if (car.sensors.getFLtemp2() <= 0) car.sendDashError(64);
+   // 65: Overengaged suspension
+   if (car.sensors.getFLtravel() > 1)car.sendDashError(65);
+   // 66: Underengaged suspension
+   if (car.sensors.getFLtravel() < -1) car.sendDashError(66);
+   //68: High Front-left tire pressure
+   if (car.sensors.getFLpsi() > 50) car.sendDashError(68);
+   //69: Low Front-left tire pressure
+   if (car.sensors.getFLpsi() < 24) car.sendDashError(69);
+
+   //71: Rear-right tire tempaerture too high
+   if (car.sensors.getRRtemp1() > 90) car.sendDashError(71);
+   //72: Rear-right tire temperature too low
+   if (car.sensors.getRRtemp1() < 10) car.sendDashError(72);
+   //73: Rear-right brake temperature too high
+   if (car.sensors.getRRtemp2() > 450) car.sendDashError(73);
+   //74: Rear-right brake temperature too low
+   if (car.sensors.getRRtemp2() <= 0) car.sendDashError(74);
+   // 75: Overengaged suspension
+   if (car.sensors.getRRtravel() > 1) car.sendDashError(75);
+   // 76: Underengaged suspension
+   if (car.sensors.getRRtravel() < -1) car.sendDashError(76);
+   //78: High Rear-right tire pressure
+   if (car.sensors.getRRpsi() > 50) car.sendDashError(78);
+   //79: Low Rear-right tire presure
+   if (car.sensors.getRRpsi() < 24) car.sendDashError(79);
+   
+   //81: Rear-left tire tempaerture too high
+   if (car.sensors.getRLtemp1() > 90) car.sendDashError(81);
+   //82: Rear-left tire temperature too low
+   if (car.sensors.getRLtemp1() < 10) car.sendDashError(82);
+   //83: Rear-left brake temperature too high
+   if (car.sensors.getRLtemp2() > 450) car.sendDashError(83);
+   //84: Rear-left brake temperature too low
+   if (car.sensors.getRLtemp2() <= 0) car.sendDashError(84);
+   //85: Overengaged suspension
+   if (car.sensors.getRLtravel() > 1) car.sendDashError(85);
+   //86: Underengaged suspension
+   if (car.sensors.getRLtravel() < -1) car.sendDashError(86);
+   //88: High Rear-left tire pressure
+   if (car.sensors.getRLpsi() > 50) car.sendDashError(88);
+   //89: Low Rear-left tire presure
+   if (car.sensors.getRLpsi() < 24) car.sendDashError(89);
+
+}
+
+// IMPORTANT CHECKS
+
+volatile bool batteryTempHigh(){ return car.BMS.getTemp() > CELL_TEMP_WARN; }
+volatile bool noCurrent(){return car.DTI.getDCCurrent() < VALUE_MIN_CURRENT_THRESHOLD; }
+//NOTE: Waiting on SCS team for proper way to do this
+volatile bool APPSBSPDViolation(){return car.pedals.getAPPS() > VALUE_APPS_BSPD_THROTTLE && (car.pedals.getBrakePressure1() > VALUE_MIN_BRAKE_PRESSURE || car.pedals.getBrakePressure2() > VALUE_MIN_BRAKE_PRESSURE);}
+volatile bool hardBrake(){return car.pedals.getBrakePressure1() > VALUE_HARD_BRAKE_LIMIT || car.pedals.getBrakePressure2() > VALUE_HARD_BRAKE_LIMIT;}
+volatile bool accelUnresponsive(){return car.pedals.getAPPS() > VALUE_APPS_UNRESPONSIVE_MAX && car.DTI.getDCCurrent() < VALUE_MIN_RESPONSIVE_CURRENT_MOTOR;} //TODO LATER FIX THIS SHIT IT IS PROB WRONG
+volatile bool motorTempHigh(){return car.DTI.getMotorTemp() > VALUE_MOT_TEMP_MAX;}
+volatile bool CANFailure(){ return ((car.DTI.getAge()) > 1000 || (car.IMD.getAge()) > 1000 ||(car.sensors.getAge()) > 1000 || (car.pedals.getAge()) > 1000|| (car.charger.getAge()) > 1000 || (car.BMS.getAge()) > 1000 );}
+volatile bool currentExceeds(){ return car.DTI.getDCCurrent()> VALUE_DTI_CURRENT_THRESHOLD; }
+volatile bool systemError(){} 
+volatile bool IMDFault(){ return car.IMD.getHardware_Error();}
+volatile bool GForceCrash(){
+   return sqrt(car.sensors.getLinAccelX()*car.sensors.getLinAccelX() +
+                           car.sensors.getLinAccelY()*car.sensors.getLinAccelY() +
+                           car.sensors.getLinAccelZ()*car.sensors.getLinAccelZ()) > VALUE_G_FORCE_LIMIT;
+}
 
 States sendToError(volatile States currentState, volatile bool (*erFunc)(void)){
    errorCheck = erFunc; 
@@ -68,12 +127,13 @@ States sendToError(volatile States currentState, volatile bool (*erFunc)(void)){
    return ERROR;
 }
 
+/*
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                          MAIN LOOP
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
 void loop() {
-
-
-
   if(batteryTempHigh()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT0);}
-  if(batteryTempLow()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT1);}
   if(noCurrent()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT2);}
   if(APPSBSPDViolation()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT3);}
   if(hardBrake()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT4);}
@@ -85,8 +145,8 @@ void loop() {
   if(IMDFault()){NVIC_TRIGGER_IRQ(IRQ_GPIO2_0_15);}
   if(GForceCrash()){NVIC_TRIGGER_IRQ(IRQ_GPIO2_16_31);}
 
-  // Delay for a short period of time to prevent the loop from running too frequently
-  //delay(100); 
+  TS_WARN_Check();
+
 
      switch (state) {
       case OFF:
@@ -114,81 +174,83 @@ void loop() {
          state = error(car, prevState, errorCheck);
          break;
    }
-
-   // print out the errors from the buffer
-   errorBuffer.printMessages();
 }
 
-
-//NOTE: 
-// might want to think about how we are going to restore certain settings once there isnt an error anymore. 
-
+/*
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                      HIGH PRIORITY INTERRUPT SERVICE ROUTINES 
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
 
 
 
 // Interrupt handler for battery temperature high
 void BatteryTempHigh_ISR() {
-   // Disallow Charging
-   // Send Message to Dash
-   errorBuffer.addMessage(ERROR_HIGH_CELL_TEMP);
-   // Limit Motor Current Draw
-   car.DTI.setMaxCurrent(VALUE_OVERHEAT_CURRENT_LIMIT);
-   // Shut down car if Very high
-   if(car.BMS.getTemp() > VALUE_CRITICAL_BATTERY_TEMP_HIGH){
-      errorBuffer.addMessage(ERROR_CRITICAL_CELL_TEMP);
+   // CRITICAL
+   if(car.BMS.getTemp() > CRITICAL_CELL_TEMP){
+      car.DTI.setCurrent(0);
+      car.DTI.setDriveEnable({0});
+      car.sendDashError(102);
       state = sendToError(state, &batteryTempHigh);
    }
+   else{
+      // WARNING ONLY
+   car.sendDashError(2);
+
+   /*
+      TODO: FIX
+   */
+   // Limit Motor Current Draw
+   car.DTI.setMaxCurrent(CELL_OVERHEAT_CURRENT_LIMIT);
+   // TODO: WAY TO RESTORE MAX CURRENT ONCE NOT OVERHEATING
+   }
+   
 }
 
-// Interrupt handler for battery temperature low
-void BatteryTempLow_ISR() {
-   // Send Message to Dash
-   errorBuffer.addMessage(ERROR_LOW_CELL_TEMP);
-   state = sendToError(state, &batteryTempLow);
-
-}
 
 // Interrupt handler for no current
 void NoCurrent_ISR() {
-   // Dashboard Warning Send
-   errorBuffer.addMessage(ERROR_NO_CURRENT_DTI);
+   car.sendDashError(103);
    state = sendToError(state, &noCurrent);
 }
 
 // Interrupt handler for accelerator and brakes
 void APPSBSPDCheck_ISR() {
-   // Disengage motor
-   car.DTI.setCurrent(0);
-   // Send message to Dash
-   errorBuffer.addMessage(ERROR_APPS_BSPD);
-   
+   while(APPSBSPDViolation()){
+      car.DTI.setCurrent(0);
+      // Send message to Dash
+      car.sendDashError(99);
+   }
 }
 
 // Interrupt handler for hard brake
 void HardBrake_ISR() {
-   // Disengage motor
-   car.DTI.setRCurrent(0);
+   // Can someone confirm the rule for this. 
+   car.DTI.setCurrent(0);
    state = sendToError(state, &hardBrake);
 }
 
 // Interrupt handler for unresponsive throttle
 void UnresponsiveThrottle_ISR() {
    // Send Dash Warning
-   errorBuffer.addMessage(ERROR_THROTTLE_SIGNAL);
+   car.sendDashError(104);
    state = sendToError(state, &accelUnresponsive);
 }
 
 // Interrupt handler for motor temperature high
 void MotorTempHigh_ISR() {
-   // Give dash warning
-   errorBuffer.addMessage(ERROR_MOTOR_TEMP);
-   // Limit Motor Current draw
-   car.DTI.setMaxCurrent(VALUE_MAX_CURRENT_DRAW_HIGH_MOTOR);
-   // IF very high, stop car
    if(car.DTI.getMotorTemp() > VALUE_CRITICAL_MOTOR_TEMP){
-      errorBuffer.addMessage(ERROR_CRITICAL_MOTOR_TEMP);
-      car.DTI.setCurrent(0);
+      car.sendDashError(105);
       state = sendToError(state, &motorTempHigh);
+   }
+   else{
+      /*
+      TODO FIX
+      */
+      // Give dash warning
+      car.sendDashError(3);
+      // Limit Motor Current draw
+      car.DTI.setMaxCurrent(VALUE_MAX_CURRENT_DRAW_HIGH_MOTOR);
    }
 }
 
@@ -199,22 +261,20 @@ void NoCAN_ISR() {
 
 // Interrupt handler for current too high
 void CurrentExceeds_ISR() {
-   errorBuffer.addMessage("CRITICAL: CURRENT LIMIT EXCEEDED");
+   car.sendDashError(106);
    state = sendToError(state, &currentExceeds);
 }
 
 // Interrupt handler for system error
 void SystemError_ISR() {
-   cout << "TEST";
+   car.sendDashError(100);
    state = sendToError(state, &systemError);
 }
 
 // Interrupt handler for insulation fault
 void IMDFault_ISR() {
    // Give dash a critical warning
-   errorBuffer.addMessage(ERROR_IMD_FAULT);
-   // Shut Down carß
-   car.DTI.setCurrent(0);
+   car.sendDashError(107);
    state = sendToError(state, &IMDFault);
 
 }
@@ -222,15 +282,17 @@ void IMDFault_ISR() {
 // Interrupt handler for car crash
 void CarCrashed_ISR() {
    // Dash Warning
-   errorBuffer.addMessage("Rip.");
-
-   // Disengage motor
-   car.DTI.setCurrent(0);
-   // Shut down car
+   car.sendDashError(108);
    state = sendToError(state, &GForceCrash);
 
 }
 
+
+/*
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                           SETUP
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+*/
 
 void setup() {
 
@@ -243,47 +305,33 @@ void setup() {
   // Enable interrupts for battery temperature high 
   attachInterruptVector(IRQ_GPIO1_INT0, &BatteryTempHigh_ISR);
   NVIC_ENABLE_IRQ(IRQ_GPIO1_INT0);
-  
-  //battery temp low
-  attachInterruptVector(IRQ_GPIO1_INT1, &BatteryTempLow_ISR);
-  NVIC_ENABLE_IRQ(IRQ_GPIO1_INT1);
-
   // Enable interrupts for no current 
   attachInterruptVector(IRQ_GPIO1_INT2, &NoCurrent_ISR);
   NVIC_ENABLE_IRQ(IRQ_GPIO1_INT2);
-
   // APPS/BSPD accelerator and brakes
   attachInterruptVector(IRQ_GPIO1_INT3, &APPSBSPDCheck_ISR);
   NVIC_ENABLE_IRQ(IRQ_GPIO1_INT3);
-  
   // Enable interrupts for hard brake 
   attachInterruptVector(IRQ_GPIO1_INT4, &HardBrake_ISR);
   NVIC_ENABLE_IRQ(IRQ_GPIO1_INT4);
-  
   // unresponsive throttle
   attachInterruptVector(IRQ_GPIO1_INT5, &UnresponsiveThrottle_ISR);
   NVIC_ENABLE_IRQ(IRQ_GPIO1_INT5);
-  
   // Enable interrupts for motor temperature high 
   attachInterruptVector(IRQ_GPIO1_INT6, &MotorTempHigh_ISR);
   NVIC_ENABLE_IRQ(IRQ_GPIO1_INT6);
-  
   // no CAN signal
   attachInterruptVector(IRQ_GPIO1_INT7, &NoCAN_ISR);
   NVIC_ENABLE_IRQ(IRQ_GPIO1_INT7);
-  
   // Enable interrupts for current too high 
   attachInterruptVector(IRQ_GPIO1_0_15, &CurrentExceeds_ISR);
   NVIC_ENABLE_IRQ(IRQ_GPIO1_0_15);
-  
   // system error
   attachInterruptVector(IRQ_GPIO1_16_31, &SystemError_ISR);
   NVIC_ENABLE_IRQ(IRQ_GPIO1_16_31);
-  
   // Enable interrupts for insulation fault
   attachInterruptVector(IRQ_GPIO2_0_15, &IMDFault_ISR);
   NVIC_ENABLE_IRQ(IRQ_GPIO2_0_15);
-  
   // car crash
   attachInterruptVector(IRQ_GPIO2_16_31, &CarCrashed_ISR);
   NVIC_ENABLE_IRQ(IRQ_GPIO2_16_31);
