@@ -9,6 +9,6 @@
 // #include "Nodes.h" (because its already included in I_no_can_speak_flex.h)
 #include "I_no_can_speak_flex.h"
 
-enum States {ERROR, OFF, ON, ON_READY, DRIVE, CHARGE_PRECHARGE, CHARGE_CHARGING, CHARGE_FULL};
+enum States {OFF, ON, ON_READY, DRIVE, CHARGE_PRECHARGE, CHARGE_CHARGING, CHARGE_FULL, ERROR};
 
 #endif
