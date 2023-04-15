@@ -12,10 +12,11 @@ bool onPressed(I_no_can_speak_flex &car) {
     else return false;
 }
 
-std::vector<int> systemsCheck(I_no_can_speak_flex &car) {
+std::vector<int> startupCheck(I_no_can_speak_flex &car) {
     std::vector<int> crit_codes;
     //make sure the data works
 
+//CAN FAULT below (100):
     //100: Unable to revieve CAN packets
     if ((car.DTI.getAge()) > 1000) crit_codes.push_back(100);
     if ((car.IMD.getAge()) > 1000) crit_codes.push_back(100);
@@ -24,18 +25,34 @@ std::vector<int> systemsCheck(I_no_can_speak_flex &car) {
     if ((car.charger.getAge()) > 1000) crit_codes.push_back(100);
     if ((car.BMS.getAge()) > 1000) crit_codes.push_back(100);
 
+    /* don't know if this will work…
+        if (CANFailure()) crit_codes.push_back(100);
+    */
+
+
+
+//IMPORTANT SH!T BELOW (150 - 152, 191 - 192):
+    //150: Motor is running when not supposed to
+    if (car.DTI.getERPM() != 0 || car.DTI.getDuty() != 0 || car.DTI.getACCurrent() != 0) crit_codes.push_back(150);
+
+    //151: Wait... the thing isn't actually on
+    if (car.DTI.getDCCurrent() <= 0) crit_codes.push_back(151);
+
+    //152: Drive disabled
+    if (car.DTI.getDriveEnable() != 1) crit_codes.push_back(152);
+
+    //191: Accelerator engaged
+    if (car.pedals.getAPPS() > 0) crit_codes.push_back(191);
+    
+    //192: Brakes not engaged upon startup
+    if (car.pedals.getBrakePressure1() != 0 || car.pedals.getBrakePressure2() != 0) crit_codes.push_back(192);
+
+
+
+//Other CAN DTI data faults (160 - 169, 10 - 19):
     //150 - 160: Motor faults, refer to CAN documentation
     int i = 0;
     if ((i = car.DTI.getFaults()) != 0) crit_codes.push_back(i + 149);
-
-    //110: Motor is running when not supposed to
-    if (car.DTI.getERPM() != 0 || car.DTI.getDuty() != 0 || car.DTI.getACCurrent() != 0) crit_codes.push_back(110);
-
-    //106: Wait... the thing isn't actually on
-    if (car.DTI.getDCCurrent() <= 0) crit_codes.push_back(106);
-
-    //105: Drive disabled
-    if (car.DTI.getDriveEnable() != 1) crit_codes.push_back(105);
 
     //016: Capacitor Temperature Limit Disabled
     if (!car.DTI.getCapTempLim() != 1) crit_codes.push_back(16);
@@ -56,11 +73,11 @@ std::vector<int> systemsCheck(I_no_can_speak_flex &car) {
     if (!car.DTI.getRPMMaxLimit() != 1) crit_codes.push_back(23);
     if (!car.DTI.getPowerLimit() != 1) crit_codes.push_back(24);
 
-    //30: Overexcessive current from battery
-    if (car.BMS.getCurrent() < -500) crit_codes.push_back(30);
 
-    //130: Okay, enough current draw…
-    if (car.BMS.getCurrent() < -999) crit_codes.push_back(130);
+
+//BATTERY STARTUP ERRORS (170 - 179, 20 - 29)
+    //130: Overexcessive current from battery at startup
+    if (car.BMS.getCurrent() <= -1) crit_codes.push_back(130);
 
     //131: Charging while driving
     if (car.BMS.getCurrent() >= 0) crit_codes.push_back(131);
@@ -72,7 +89,7 @@ std::vector<int> systemsCheck(I_no_can_speak_flex &car) {
     if (car.BMS.getVoltage() > 120) crit_codes.push_back(33);
 
     //133: Very Overexcessive Voltage
-    if (car.BMS.getVoltage() > 120) crit_codes.push_back(133);
+    if (car.BMS.getVoltage() > 240) crit_codes.push_back(133);
 
     //34: Low battery
     if (car.BMS.getChargeState() < 20) crit_codes.push_back(34);
@@ -93,12 +110,16 @@ std::vector<int> systemsCheck(I_no_can_speak_flex &car) {
     if (car.BMS.getHealth() > 100) crit_codes.push_back(137);
 
     //2, 102: High Battery Temperature
-    if (car.BMS.getTemp() > 60) crit_codes.push_back(2);
+    if (car.BMS.getTemp() > CRITICAL_CELL_TEMP) crit_codes.push_back(102);
+    else if (car.BMS.getTemp() > CELL_TEMP_WARN)
+    crit_codes.push_back(2);
 
     //101: Low Battery Temperature
     if (car.BMS.getTemp() < 0) crit_codes.push_back(101);
 
 
+
+//IMD STARTUP ERRORS (180 - 189, 30 - 39)
     //40: IMD High Uncertatinty
     if (car.IMD.getHigh_Uncertainty() != 1) crit_codes.push_back(40);
     
@@ -126,7 +147,8 @@ std::vector<int> systemsCheck(I_no_can_speak_flex &car) {
     //47: Low car.BMS Voltage / car.BMS Disconnect
     if (car.IMD.getLow_Battery_Voltage() != 0) crit_codes.push_back(47);
 
-    //50: car's moving... !!!! linear quantities assumed in meters, angualar quantities assumed in radians.
+
+//50: car's moving... !!!! linear quantities assumed in meters, angualar quantities assumed in radians.
     if (
         fabs(car.sensors.getLinAccelX()) > 0.025 ||
         fabs(car.sensors.getLinAccelY()) > 0.025 ||
@@ -249,12 +271,6 @@ std::vector<int> systemsCheck(I_no_can_speak_flex &car) {
 
     //89: Low Rear-left tire presure
     if (car.sensors.getRLpsi() < 24) crit_codes.push_back(89);
-
-    //191: Accelerator engaged
-    if (car.pedals.getAPPS() > 0) crit_codes.push_back(191);
-    
-    //192: Brakes not engaged upon startup
-    if (car.pedals.getBrakePressure1() != 0 || car.pedals.getBrakePressure2() != 0) crit_codes.push_back(192);
 
     return crit_codes;
 }
