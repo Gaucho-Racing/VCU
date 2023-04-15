@@ -1,9 +1,10 @@
-    //onOffUtility.cpp
-    // @yarwinliu, @rt.z, 03122023
+//onOffUtility.cpp
+// @yarwinliu, @rt.z, 03122023
 
-    #include "main.h"
-    #include "onOffUtility.h"
-    #include <cmath>
+#include "error.h"
+#include "constants.h"
+#include "onOffUtility.h"
+#include <cmath>
 
 //returns true if there is current running to the motor
 bool onPressed(I_no_can_speak_flex &car) {  
