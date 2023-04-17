@@ -9,9 +9,9 @@
 //returns true if there is current running to the motor
 bool onPressed(I_no_can_speak_flex &car);
 
-//bool* systemsCheck(I_no_can_speak_flex &car);
-
 std::vector<int> startupCheck(I_no_can_speak_flex &car);
+
+volatile bool hasStartupCrits(I_no_can_speak_flex &car);
 
 bool driveEngaged(I_no_can_speak_flex &car);
 
