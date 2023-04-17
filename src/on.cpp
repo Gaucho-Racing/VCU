@@ -9,13 +9,15 @@
 //check for all conditions to allow for ON_READY
 States on(I_no_can_speak_flex &car) {
    car.DTI.setRCurrent(0);
-   std::vector<int> systems_check = systemsCheck(car);
+   std::vector<int> systems_check = startupCheck(car);
    bool error_detected = 0;
    for (int code : systems_check) {
       if (code >= 100) error_detected = 1;
       //that can command to send it over…
    }
    if (error_detected) return ERROR;
+
+   //beeper: 5V, 0.5 amps to some pin for 1 second.
    else return ON_READY;
 
    /*
