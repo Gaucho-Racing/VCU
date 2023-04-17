@@ -8,7 +8,6 @@
 #include <Arduino.h>
 #include <imxrt.h>
 #include <vector>
-// #include "Nodes.h" (because its already included in I_no_can_speak_flex.h)
 #include "I_no_can_speak_flex.h"
 
 enum States {OFF, ON, ON_READY, DRIVE, CHARGE_PRECHARGE, CHARGE_CHARGING, CHARGE_FULL, ERROR};

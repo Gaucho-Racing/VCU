@@ -166,6 +166,7 @@ void APPSBSPDCheck_ISR() {
 // Interrupt handler for hard brake
 void HardBrake_ISR() {
    // Can someone confirm the rule for this. 
+   // There's no rule for this. It's just a safety feature we decided on in case the car's out of control.
    car.DTI.setCurrent(0);
    state = sendToError(state, &hardBrake);
 }
@@ -196,7 +197,7 @@ void MotorTempHigh_ISR() {
 
 // Interrupt handler for no CAN signal
 void NoCAN_ISR() {
-   // IDK Shut down?
+   // IDK Shut down? Yup. -rt.z
 }
 
 // Interrupt handler for current too high
