@@ -11,6 +11,16 @@ const byte CELL_TEMP_WARN = 57; // Deg Centigrade
 const byte CRITICAL_CELL_TEMP = 60;  // Deg Centigrade
 const int CELL_OVERHEAT_CURRENT_LIMIT = 60; //kW
 
+//for TMP check…
+const float MAX_TIRE_TEMP_C;
+const float MIN_TIRE_TEMP_C;
+const float MAX_BRAKE_TEMP_C;
+const float MIN_BRAKE_TEMP_C;
+const float SUSPENSION_MAX;
+const float SUSPENSION_MIN;
+const float WARN_STARTUP_WHEEL_SPEED;
+const float MAX_TIRE_PSI;
+const float MIN_TIRE_PSI;
 
 const int VALUE_MOT_TEMP_MAX = 0;
 const int VALUE_MOT_TEMP_MIN = 0;
