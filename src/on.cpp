@@ -1,7 +1,6 @@
 //on.cpp
 
 #include "main.h"
-#include "error.h"
 #include "onOffUtility.h"
 
 //Run all code for initialization; 
@@ -10,25 +9,12 @@
 //check for all conditions to allow for ON_READY
 States on(I_no_can_speak_flex &car) {
    car.DTI.setRCurrent(0);
-   std::vector<int> systems_check = startupCheck(car);
-   std::vector<int> error_codes;
-   std::vector<int> off_codes;
-   for (int code : systems_check) {
-      if (code == 152 || code == 192 || code == 191 || code == 151) {
-         sendDashError(code);
-         return OFF;
-      }
-      if (code >= 100) error_codes.push_back(code);
-   }
-   if (!error_codes.empty()) {
-      for (int code : error_codes) {
-         sendDashError(code);
-      }
-      return sendToError(ON, &hasStartupCrits);
-   }
+   if (isRejectingStartup(car)) return OFF;
+   if (criticalCheck(car)) return ERROR;
+   warningCheck(car);
 
    //beeper: 5V, 0.5 amps to some pin for 1 second.
-   else return ON_READY;
+   return ON_READY;
 
    /*
    if(!systemsCheck(car)) { //if it returns zero, we move to ON_READY

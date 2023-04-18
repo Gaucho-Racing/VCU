@@ -14,7 +14,5 @@ States off(I_no_can_speak_flex &car) {
         return CHARGE_PRECHARGE;
     } 
     
-    //currentState = OFF; //not needed
-    
     return OFF;
 }

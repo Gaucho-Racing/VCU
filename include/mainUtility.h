@@ -1,8 +1,12 @@
-//this has a bunch of stuff that is basically used by everything hence the extern stuff
+//mainUtility.h
+// @rt.z, @Th3Will
 
-#ifndef STATES
-#define STATES
-#include "string"
+#ifndef MAIN_UTILITY
+#define MAIN_UTILITY
+
+#include <string>
+
+void TS_WARN_Check(I_no_can_speak_flex &car);
 
 //need extern to modify across files apparently
 struct carFailure {
@@ -13,4 +17,5 @@ struct carFailure {
     volatile std::string errMess;
 };
 //sub-system declarations 
+
 #endif

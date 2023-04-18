@@ -2,9 +2,9 @@
 // @yarwinliu, @rt.z, 03122023
 
 #include "main.h"
-#include "error.h"
 #include "constants.h"
 #include "onOffUtility.h"
+#include <vector>
 #include <cmath>
 
 //returns true if there is current running to the motor
@@ -12,11 +12,38 @@ bool onPressed(I_no_can_speak_flex &car) {
     return (car.DTI.getDCCurrent() > 0);
 }
 
-std::vector<int> startupCheck(I_no_can_speak_flex &car) {
-    std::vector<int> crit_codes;
-    //make sure the data works
+bool isRejectingStartup(I_no_can_speak_flex &car) {
+    //152: Drive disabled
+    if (car.DTI.getDriveEnable() != 1) {
+        car.sendDashError(152);
+        return true;
+    }
 
-//CAN FAULT below (100):
+    //151: Wait... the thing isn't actually on
+    if (car.DTI.getDCCurrent() <= 0) {
+        car.sendDashError(151);
+        return true;
+    }
+
+    //191: Accelerator engaged
+    if (car.pedals.getAPPS() > 0) {
+        car.sendDashError(191);
+        return true;
+    }
+    
+    //192: Brakes not engaged upon startup
+    if (car.pedals.getBrakePressure1() != 0 || car.pedals.getBrakePressure2() != 0) {
+        car.sendDashError(192);
+        return true;
+    }
+
+    return false;
+}
+
+bool criticalCheck(I_no_can_speak_flex &car, bool send_dash_errors = true) {
+    std::vector<int> crit_codes;
+
+    //CAN FAULT (100):
     //100: Unable to revieve CAN packets
     if ((car.DTI.getAge()) > 1000) crit_codes.push_back(100);
     if ((car.IMD.getAge()) > 1000) crit_codes.push_back(100);
@@ -31,253 +58,159 @@ std::vector<int> startupCheck(I_no_can_speak_flex &car) {
 
 
 
-//IMPORTANT SH!T BELOW (150 - 152, 191 - 192):
+    //IMPORTANT SH!T BELOW (150):
     //150: Motor is running when not supposed to
     if (car.DTI.getERPM() != 0 || car.DTI.getDuty() != 0 || car.DTI.getACCurrent() != 0) crit_codes.push_back(150);
 
-    //151: Wait... the thing isn't actually on
-    if (car.DTI.getDCCurrent() <= 0) crit_codes.push_back(151);
-
-    //152: Drive disabled
-    if (car.DTI.getDriveEnable() != 1) crit_codes.push_back(152);
-
-    //191: Accelerator engaged
-    if (car.pedals.getAPPS() > 0) crit_codes.push_back(191);
-    
-    //192: Brakes not engaged upon startup
-    if (car.pedals.getBrakePressure1() != 0 || car.pedals.getBrakePressure2() != 0) crit_codes.push_back(192);
 
 
-
-//Other CAN DTI data faults (160 - 169, 10 - 19):
-    //150 - 160: Motor faults, refer to CAN documentation
+    //Other CAN DTI data faults (160 - 169):
+    //159 - 169: Motor faults, refer to CAN documentation
     int i = 0;
-    if ((i = car.DTI.getFaults()) != 0) crit_codes.push_back(i + 149);
-
-    //016: Capacitor Temperature Limit Disabled
-    if (!car.DTI.getCapTempLim() != 1) crit_codes.push_back(16);
-
-    //017: IGBT Accel. Limit Disabled
-    if (!car.DTI.getIgbtAccelTempLim() != 1) crit_codes.push_back(17);
-
-    //018: IGBT Temp. Limit Disabled 
-    if (!car.DTI.getIgbtTempLim() != 1) crit_codes.push_back(18);
-
-    //019: Motor accel temp. limit disabled
-    if (!car.DTI.getVoltInLim() != 1) crit_codes.push_back(19);
-
-    //etc. (im too lazy to type them all out)
-    if (!car.DTI.getMotorAccelTempLim() != 1) crit_codes.push_back(20);
-    if (!car.DTI.getMotorTempLim() != 1) crit_codes.push_back(21);
-    if (!car.DTI.getRPMMinLimit() != 1) crit_codes.push_back(22);
-    if (!car.DTI.getRPMMaxLimit() != 1) crit_codes.push_back(23);
-    if (!car.DTI.getPowerLimit() != 1) crit_codes.push_back(24);
+    if ((i = car.DTI.getFaults()) != 0) crit_codes.push_back(i + 158);
 
 
 
-//BATTERY STARTUP ERRORS (170 - 179, 20 - 29)
+    //BATTERY STARTUP ERRORS (170 - 179)
     //130: Overexcessive current from battery at startup
-    if (car.BMS.getCurrent() <= -1) crit_codes.push_back(130);
+    if (car.BMS.getCurrent() <= -1) crit_codes.push_back(170);
 
     //131: Charging while driving
-    if (car.BMS.getCurrent() >= 0) crit_codes.push_back(131);
+    if (car.BMS.getCurrent() >= 0) crit_codes.push_back(171);
 
     //132: Low Voltage
-    if (car.BMS.getVoltage() < 5) crit_codes.push_back(131);
-
-    //33: Overexcessive Voltage
-    if (car.BMS.getVoltage() > 120) crit_codes.push_back(33);
+    if (car.BMS.getVoltage() < 5) crit_codes.push_back(172);
 
     //133: Very Overexcessive Voltage
-    if (car.BMS.getVoltage() > 240) crit_codes.push_back(133);
-
-    //34: Low battery
-    if (car.BMS.getChargeState() < 20) crit_codes.push_back(34);
+    if (car.BMS.getVoltage() > 240) crit_codes.push_back(173);
 
     //134: Very Low battery
-    if (car.BMS.getChargeState() < 5) crit_codes.push_back(134);
+    if (car.BMS.getChargeState() < 5) crit_codes.push_back(174);
 
     //135: Battery Overcharge
-    if (car.BMS.getChargeState() > 100) crit_codes.push_back(135);
-
-    //36: Battery Health Low
-    if (car.BMS.getHealth() < 80) crit_codes.push_back(36);
+    if (car.BMS.getChargeState() > 100) crit_codes.push_back(175);
 
     //136: Battery Health Very Low
-    if (car.BMS.getHealth() < 50) crit_codes.push_back(136);
+    if (car.BMS.getHealth() < 50) crit_codes.push_back(176);
 
     //137: Faulty Battery Health Data
-    if (car.BMS.getHealth() > 100) crit_codes.push_back(137);
+    if (car.BMS.getHealth() > 100) crit_codes.push_back(177);
 
     //2, 102: High Battery Temperature
     if (car.BMS.getTemp() > CRITICAL_CELL_TEMP) crit_codes.push_back(102);
-    else if (car.BMS.getTemp() > CELL_TEMP_WARN)
-    crit_codes.push_back(2);
 
     //101: Low Battery Temperature
     if (car.BMS.getTemp() < 0) crit_codes.push_back(101);
 
 
 
-//IMD STARTUP ERRORS (180 - 189, 30 - 39)
-    //40: IMD High Uncertatinty
-    if (car.IMD.getHigh_Uncertainty() != 1) crit_codes.push_back(40);
-    
-    //41: Isolation warning. See can documentation.
-    if ((i = car.IMD.getIsolationStates()) == 10) crit_codes.push_back(41);
-
+    //IMD STARTUP ERRORS (180 - 189):
     //141: Isolation fault. See can documentation.
-    if ((i = car.IMD.getIsolationStates()) == 11) crit_codes.push_back(141);
+    if ((i = car.IMD.getIsolationStates()) == 11) crit_codes.push_back(181);
 
     //142: Isolation state unknown. See can documentation.
-    if ((i = car.IMD.getIsolationStates()) == 1) crit_codes.push_back(142);
+    if ((i = car.IMD.getIsolationStates()) == 1) crit_codes.push_back(182);
 
     //143: Isolation Hardware error.
-    if (car.IMD.getHardware_Error() != 0) crit_codes.push_back(143);
+    if (car.IMD.getHardware_Error() != 0) crit_codes.push_back(183);
 
     //144: Electrostatic potential energy exceeds 0.2J
-    if (car.IMD.getTouch_energy_fault() != 0) crit_codes.push_back(144);
+    if (car.IMD.getTouch_energy_fault() != 0) crit_codes.push_back(184);
 
     //145: Exitation pulse not opertional
-    if (car.IMD.getExc_off() != 0) crit_codes.push_back(145);
-
-    //46: IMD: High battery Voltage / No max_battery_working_voltage set
-    if (car.IMD.getHigh_Battery_Voltage() != 0) crit_codes.push_back(46);
+    if (car.IMD.getExc_off() != 0) crit_codes.push_back(185);
 
     //147: IMD: Low battery Voltage / Battery Disconnect
-    if (car.IMD.getLow_Battery_Voltage() != 0) crit_codes.push_back(147);
+    if (car.IMD.getLow_Battery_Voltage() != 0) crit_codes.push_back(187);
 
 
-//49+: car's moving... !!!! linear quantities assumed in meters, angualar quantities assumed in radians.
+
+    if (send_dash_errors) for (int code : crit_codes) car.sendDashError((byte)code);
+    return (crit_codes.empty());
+}
+
+bool warningCheck(I_no_can_speak_flex &car, bool send_dash_warnings = true) {
+    std::vector<int> warn_codes;
+
+
+    //016: Capacitor Temperature Limit Disabled
+    if (!car.DTI.getCapTempLim() != 1) warn_codes.push_back(16);
+
+    //017: IGBT Accel. Limit Disabled
+    if (!car.DTI.getIgbtAccelTempLim() != 1) warn_codes.push_back(17);
+
+    //018: IGBT Temp. Limit Disabled 
+    if (!car.DTI.getIgbtTempLim() != 1) warn_codes.push_back(18);
+
+    //019: Motor accel temp. limit disabled
+    if (!car.DTI.getVoltInLim() != 1) warn_codes.push_back(19);
+
+    //etc. (im too lazy to type them all out)
+    if (!car.DTI.getMotorAccelTempLim() != 1) warn_codes.push_back(20);
+    if (!car.DTI.getMotorTempLim() != 1) warn_codes.push_back(21);
+    if (!car.DTI.getRPMMinLimit() != 1) warn_codes.push_back(22);
+    if (!car.DTI.getRPMMaxLimit() != 1) warn_codes.push_back(23);
+    if (!car.DTI.getPowerLimit() != 1) warn_codes.push_back(24);
+
+
+
+    //BATTERY STARTUP WARINGS (20 - 29)
+    //33: Overexcessive Voltage
+    if (car.BMS.getVoltage() > 120) warn_codes.push_back(23);
+
+    //34: Low battery
+    if (car.BMS.getChargeState() < 20) warn_codes.push_back(24);
+
+    //36: Battery Health Low
+    if (car.BMS.getHealth() < 80) warn_codes.push_back(26);
+
+    if (car.BMS.getTemp() > CELL_TEMP_WARN) warn_codes.push_back(2);
+
+
+    //IMD STARTUP WARNINGS (30 - 39)
+    //40: IMD High Uncertatinty
+    if (car.IMD.getHigh_Uncertainty() != 1) warn_codes.push_back(30);
+    
+    int i;
+    //41: Isolation warning. See can documentation.
+    if ((i = car.IMD.getIsolationStates()) == 10) warn_codes.push_back(31);
+
+    //46: IMD: High battery Voltage / No max_battery_working_voltage set
+    if (car.IMD.getHigh_Battery_Voltage() != 0) warn_codes.push_back(36);
+
+
+
+    //49+: car's moving... !!!! linear quantities assumed in meters, angualar quantities assumed in radians.
     if (
         fabs(car.sensors.getLinAccelX()) > 0.025 ||
         fabs(car.sensors.getLinAccelY()) > 0.025 ||
         fabs(car.sensors.getLinAccelZ()) > 0.025) {
-        crit_codes.push_back(49);
+        warn_codes.push_back(49);
     }
 
     if (
         fabs(car.sensors.getAngVeloX()) > 0.05 ||  
         fabs(car.sensors.getAngVeloY()) > 0.05 ||  
         fabs(car.sensors.getAngVeloZ()) > 0.05) {
-        crit_codes.push_back(50);
+        warn_codes.push_back(50);
     }
 
     //57: Front-right wheel is moving. 
-    if (fabs(car.sensors.getFRspeed()) > WARN_STARTUP_WHEEL_SPEED) crit_codes.push_back(57);
+    if (fabs(car.sensors.getFRspeed()) > WARN_STARTUP_WHEEL_SPEED) warn_codes.push_back(57);
 
     //67: Front-left wheel is moving. 
-    if (fabs(car.sensors.getFLspeed()) > WARN_STARTUP_WHEEL_SPEED) crit_codes.push_back(67);
+    if (fabs(car.sensors.getFLspeed()) > WARN_STARTUP_WHEEL_SPEED) warn_codes.push_back(67);
 
     //77: Rear-right wheel is moving
-    if (car.sensors.getRRspeed() > WARN_STARTUP_WHEEL_SPEED) crit_codes.push_back(77);
+    if (car.sensors.getRRspeed() > WARN_STARTUP_WHEEL_SPEED) warn_codes.push_back(77);
 
     //87: Rear-left wheel is moving
-    if (car.sensors.getRLspeed() > WARN_STARTUP_WHEEL_SPEED) crit_codes.push_back(87);
+    if (car.sensors.getRLspeed() > WARN_STARTUP_WHEEL_SPEED) warn_codes.push_back(87);
 
 
 
-//Implicitly done with TS_WARN_Check() in main?
-/*
-    //temperatures are assumed to be in centrigrade. Wheel speed units assumed to be meters per second (linear). (@(somebody that's not rt.z) do the conversions if they turn out to be in the whatever random other temperature unit everyone else uses)
-
-    //51: Front-right tire tempaerture too high
-    if (car.sensors.getFRtemp1() > MAX_TIRE_TEMP_C) crit_codes.push_back(51);
-
-    //52: Front-right tire temperature too low
-    if (car.sensors.getFRtemp1() < MIN_TIRE_TEMP_C) crit_codes.push_back(52);
-    
-    //53: Front-right brake temperature too high
-    if (car.sensors.getFRtemp2() > MAX_BRAKE_TEMP_C) crit_codes.push_back(53);
-
-    //54: Front-right brake temperature too low
-    if (car.sensors.getFRtemp2() <= MIN_BRAKE_TEMP_C) crit_codes.push_back(54);
-
-    //55: Overengaged suspension
-    //if (car.sensors.getFRtravel() > 1) crit_codes.push_back(55);
-    //56: Underengaged suspension
-    //if (Sesnors.getFRtravel() < -1) crit_codes.push_back(56);
-
-    //58: High Front-right tire pressure
-    if (car.sensors.getFRpsi() > 50) crit_codes.push_back(58);
-
-    //59: Low Front-right tire pressure
-    if (car.sensors.getFRpsi() < 24) crit_codes.push_back(59);
-
-
-    //61: Front-left tire tempaerture too high
-    if (car.sensors.getFLtemp1() > 90) crit_codes.push_back(61);
-
-    //62: Front-left tire temperature too low
-    if (car.sensors.getFLtemp1() < 10) crit_codes.push_back(62);
-    
-    //63: Front-left brake temperature too high
-    if (car.sensors.getFLtemp2() > 450) crit_codes.push_back(63);
-
-    //64: Front-left brake temperature too low
-    if (car.sensors.getFLtemp2() <= 0) crit_codes.push_back(64);
-
-    //65: Overengaged suspension
-    //if (car.sensors.getFLtravel() > 1) crit_codes.push_back(65);
-    //66: Underengaged suspension
-    //if (Sesnors.getFLtravel() < -1) crit_codes.push_back(66);
-
-    //68: High Front-left tire pressure
-    if (car.sensors.getFLpsi() > 50) crit_codes.push_back(68);
-
-    //69: Low Front-left tire pressure
-    if (car.sensors.getFLpsi() < 24) crit_codes.push_back(69);
-
-
-    //71: Rear-right tire tempaerture too high
-    if (car.sensors.getRRtemp1() > 90) crit_codes.push_back(71);
-
-    //72: Rear-right tire temperature too low
-    if (car.sensors.getRRtemp1() < 10) crit_codes.push_back(72);
-    
-    //73: Rear-right brake temperature too high
-    if (car.sensors.getRRtemp2() > 450) crit_codes.push_back(73);
-
-    //74: Rear-right brake temperature too low
-    if (car.sensors.getRRtemp2() <= 0) crit_codes.push_back(74);
-
-    //75: Overengaged suspension
-    //if (car.sensors.getRRtravel() > 1) crit_codes.push_back(75);
-    //76: Underengaged suspension
-    //if (Sesnors.getRRtravel() < -1) crit_codes.push_back(76);
-
-    //78: High Rear-right tire pressure
-    if (car.sensors.getRRpsi() > 50) crit_codes.push_back(78);
-
-    //79: Low Rear-right tire presure
-    if (car.sensors.getRRpsi() < 24) crit_codes.push_back(79);
-
-
-    //81: Rear-left tire tempaerture too high
-    if (car.sensors.getRLtemp1() > 90) crit_codes.push_back(81);
-
-    //82: Rear-left tire temperature too low
-    if (car.sensors.getRLtemp1() < 10) crit_codes.push_back(82);
-    
-    //83: Rear-left brake temperature too high
-    if (car.sensors.getRLtemp2() > 450) crit_codes.push_back(83);
-
-    //84: Rear-left brake temperature too low
-    if (car.sensors.getRLtemp2() <= 0) crit_codes.push_back(84);
-
-    //85: Overengaged suspension
-    //if (car.sensors.getRLtravel() > 1) crit_codes.push_back(85);
-    //86: Underengaged suspension
-    //if (Sesnors.getRLtravel() < -1) crit_codes.push_back(86);
-
-    //88: High Rear-left tire pressure
-    if (car.sensors.getRLpsi() > 50) crit_codes.push_back(88);
-
-    //89: Low Rear-left tire presure
-    if (car.sensors.getRLpsi() < 24) crit_codes.push_back(89);
-*/
-
-    return crit_codes;
+    if (send_dash_warnings) for (int code : warn_codes) car.sendDashError((byte)code);
+    return (warn_codes.empty());
 }
 
 bool driveEngaged(I_no_can_speak_flex &car) {

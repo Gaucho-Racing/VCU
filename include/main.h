@@ -7,22 +7,13 @@
 
 #include <Arduino.h>
 #include <imxrt.h>
-#include <vector>
-//#include <iostream>
 #include "I_no_can_speak_flex.h"
 
 enum States {OFF, ON, ON_READY, DRIVE, CHARGE_PRECHARGE, CHARGE_CHARGING, CHARGE_FULL, ERROR};
 
-volatile States state;
-volatile States prevState; 
-volatile bool sendToDash = false;
-volatile bool (*errorCheck)(void); 
-
-//so it compiles!
-void sendDashError(int code);
+States sendToError(volatile States currentState, volatile bool (*erFunc)(void));
 
 volatile bool hasStartupCrits();
-/*
 volatile bool batteryTempHigh();
 volatile bool noCurrent();
 volatile bool APPSBSPDViolation();
@@ -34,5 +25,5 @@ volatile bool currentExceeds();
 volatile bool systemError();
 volatile bool IMDFault();
 volatile bool GForceCrash();
-*/
+
 #endif

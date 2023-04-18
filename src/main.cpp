@@ -1,18 +1,22 @@
 //#include <Arduino.h>, already done in main.h
 //#include <imxrt.h>, moved to main.h
-#include "utility.h"
 #include "main.h"
+#include "mainUtility.h"
 #include "error.h"
 #include "constants.h"
 #include "stubs.h"
 #include "onOffUtility.h"
 //#include <string>
 //#include <map>
-//#include <vector>, moved to main.h
+//#include <vector>
 //#include <algorithm>
 //#include <queue>
-#include <iostream>
+//#include <iostream>
 //using namespace std;
+
+volatile States state;
+volatile States prevState; 
+volatile bool (*errorCheck)(void); 
 
 I_no_can_speak_flex car(true);
 
@@ -68,21 +72,15 @@ volatile bool GForceCrash() {
 }
 
 // AND ONE MORE JUST TO CHECK WHETHER OR NOT THERE'S STILL CRITS. AT STARTUP -rt.z
-volatile bool hasStartupCrits(I_no_can_speak_flex &car) {
-    std::vector<int> crit_codes = startupCheck(car);
-    for (int code : crit_codes) {
-        if (code >= 100) return true;
-    }
-    return false;
+volatile bool hasStartupCrits() {
+   return criticalCheck(car, false);
 }
 
-//so it compiles! -rt.z
-void sendDashError(int code) {
-    using namespace std;
-    /*
-        car.sendDashError(int code);
-    */
-    cout << code << " ";
+/* use this for interrupts to store currentState; handles the specified error */
+States sendToError(volatile States currentState, volatile bool (*erFunc)(void)) {
+   errorCheck = erFunc; 
+   prevState = currentState; 
+   return ERROR;
 }
 
 /*
@@ -111,6 +109,7 @@ void loop() {
          break;
       case ON:
          state = on(car);
+         if (state == ERROR) sendToError(ON, &hasStartupCrits);
          break;
       case ON_READY:
          state = on_ready(car);
@@ -139,20 +138,18 @@ void loop() {
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
 
-
-
 // Interrupt handler for battery temperature high
 void BatteryTempHigh_ISR() {
    // CRITICAL
    if(car.BMS.getTemp() > CRITICAL_CELL_TEMP){
       car.DTI.setCurrent(0);
       car.DTI.setDriveEnable({0});
-      sendDashError(102);
+      car.sendDashError(102);
       state = sendToError(state, &batteryTempHigh);
    }
    else {
       // WARNING ONLY
-      sendDashError(2);
+      car.sendDashError(2);
       /*
          TODO: FIX
       */
@@ -165,7 +162,7 @@ void BatteryTempHigh_ISR() {
 
 // Interrupt handler for no current
 void NoCurrent_ISR() {
-   sendDashError(103);
+   car.sendDashError(103);
    state = sendToError(state, &noCurrent);
 }
 
@@ -174,7 +171,7 @@ void APPSBSPDCheck_ISR() {
    while(APPSBSPDViolation()){
       car.DTI.setCurrent(0);
       // Send message to Dash
-      sendDashError(99); // this will keep sending as long as APPSBSPDViolation() is true. nobody like spam -rt.z
+      car.sendDashError(99); // this will keep sending as long as APPSBSPDViolation() is true. nobody like spam -rt.z
    }
 }
 
@@ -189,14 +186,14 @@ void HardBrake_ISR() {
 // Interrupt handler for unresponsive throttle
 void UnresponsiveThrottle_ISR() {
    // Send Dash Warning
-   sendDashError(104);
+   car.sendDashError(104);
    state = sendToError(state, &accelUnresponsive);
 }
 
 // Interrupt handler for motor temperature high
 void MotorTempHigh_ISR() {
    if(car.DTI.getMotorTemp() > VALUE_CRITICAL_MOTOR_TEMP){
-      sendDashError(105);
+      car.sendDashError(105);
       state = sendToError(state, &motorTempHigh);
    }
    else {
@@ -204,7 +201,7 @@ void MotorTempHigh_ISR() {
       TODO FIX
       */
       // Give dash warning
-      sendDashError(3);
+      car.sendDashError(3);
       // Limit Motor Current draw
       car.DTI.setMaxCurrent(VALUE_MAX_CURRENT_DRAW_HIGH_MOTOR);
    }
@@ -217,27 +214,27 @@ void NoCAN_ISR() {
 
 // Interrupt handler for current too high
 void CurrentExceeds_ISR() {
-   sendDashError(106);
+   car.sendDashError(106);
    state = sendToError(state, &currentExceeds);
 }
 
 // Interrupt handler for system error
 void SystemError_ISR() {
-   sendDashError(100);
+   car.sendDashError(100);
    state = sendToError(state, &systemError);
 }
 
 // Interrupt handler for insulation fault
 void IMDFault_ISR() {
    // Give dash a critical warning
-   sendDashError(107);
+   car.sendDashError(107);
    state = sendToError(state, &IMDFault);
 }
 
 // Interrupt handler for car crash
 void CarCrashed_ISR() {
    // Dash Warning
-   sendDashError(108);
+   car.sendDashError(108);
    state = sendToError(state, &GForceCrash);
 }
 
