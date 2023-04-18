@@ -54,12 +54,12 @@ volatile bool accelUnresponsive() {
 volatile bool motorTempHigh() { return car.DTI.getMotorTemp() > VALUE_MOT_TEMP_MAX; }
 
 volatile bool CANFailure() { 
-   return (car.DTI.getAge() > 1000 || 
-      car.IMD.getAge() > 1000 || 
-      car.sensors.getAge() > 1000 || 
-      car.pedals.getAge() > 1000 || 
-      car.charger.getAge() > 1000 || 
-      car.BMS.getAge() > 1000);
+   return (car.DTI.getAge() > MAX_CAN_DURATION || 
+      car.IMD.getAge() > MAX_CAN_DURATION || 
+      car.sensors.getAge() > MAX_CAN_DURATION || 
+      car.pedals.getAge() > MAX_CAN_DURATION || 
+      car.charger.getAge() > MAX_CAN_DURATION || 
+      car.BMS.getAge() > MAX_CAN_DURATION);
 }
 
 volatile bool currentExceeds() { return car.DTI.getDCCurrent()> VALUE_DTI_CURRENT_THRESHOLD; }

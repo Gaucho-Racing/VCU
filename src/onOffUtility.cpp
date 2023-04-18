@@ -45,12 +45,12 @@ bool criticalCheck(I_no_can_speak_flex &car, bool send_dash_errors = true) {
 
     //CAN FAULT (100):
     //100: Unable to revieve CAN packets
-    if ((car.DTI.getAge()) > 1000) crit_codes.push_back(100);
-    if ((car.IMD.getAge()) > 1000) crit_codes.push_back(100);
-    if ((car.sensors.getAge()) > 1000) crit_codes.push_back(100);
-    if ((car.pedals.getAge()) > 1000) crit_codes.push_back(100);
-    if ((car.charger.getAge()) > 1000) crit_codes.push_back(100);
-    if ((car.BMS.getAge()) > 1000) crit_codes.push_back(100);
+    if ((car.DTI.getAge()) > MAX_CAN_DURATION) crit_codes.push_back(100);
+    if ((car.IMD.getAge()) > MAX_CAN_DURATION) crit_codes.push_back(100);
+    if ((car.sensors.getAge()) > MAX_CAN_DURATION) crit_codes.push_back(100);
+    if ((car.pedals.getAge()) > MAX_CAN_DURATION) crit_codes.push_back(100);
+    if ((car.charger.getAge()) > MAX_CAN_DURATION) crit_codes.push_back(100);
+    if ((car.BMS.getAge()) > MAX_CAN_DURATION) crit_codes.push_back(100);
 
     /* don't know if this will work…
         if (CANFailure()) crit_codes.push_back(100);
