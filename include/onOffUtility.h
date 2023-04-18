@@ -1,5 +1,5 @@
-//onOffUtility.cpp
-// @yarwinliu, @rt.z, 03122023
+//onOffUtility.h
+// @rt.z
 
 #ifndef ON_OFF_UTILITY
 #define ON_OFF_UTILITY

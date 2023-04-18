@@ -1,3 +1,6 @@
+//error.cpp
+// @Th3Will
+
 #include "main.h"
 #include "error.h"
 #include "constants.h"

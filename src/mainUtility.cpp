@@ -1,5 +1,5 @@
 //mainUtility.cpp
-// @rt.z, @nikunjparsar
+// @rt.z, @nikunjparasar
 
 #include "main.h"
 #include "mainUtility.h"

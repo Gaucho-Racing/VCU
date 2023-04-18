@@ -1,3 +1,6 @@
+//main.cpp
+// @nikunjparasar, @rt.z, @Th3Will
+
 //#include <Arduino.h>, already done in main.h
 //#include <imxrt.h>, moved to main.h
 #include "main.h"
@@ -108,8 +111,7 @@ void loop() {
          state = off(car);
          break;
       case ON:
-         state = on(car);
-         if (state == ERROR) sendToError(ON, &hasStartupCrits);
+         if ((state = on(car)) == ERROR) sendToError(ON, &hasStartupCrits);
          break;
       case ON_READY:
          state = on_ready(car);

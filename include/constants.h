@@ -1,8 +1,10 @@
 #ifndef CONSTANTS
+//constants.h
+// @yarwinliu, @nikunjparasar, @rt.z
+
 #define CONSTANTS
 //using namespace std;
 //canIDs
-
 
 //thresholds
 /*should be used for checking whether a subsystem is within the healthy limit

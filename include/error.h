@@ -1,3 +1,6 @@
+//error.h
+// @Th3Will
+
 #ifndef ERROR_H
 #define ERROR_H
 
