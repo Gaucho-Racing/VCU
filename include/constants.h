@@ -1,6 +1,6 @@
 #ifndef CONSTANTS
 #define CONSTANTS
-using namespace std;
+//using namespace std;
 //canIDs
 
 

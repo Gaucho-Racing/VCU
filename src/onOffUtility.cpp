@@ -1,6 +1,7 @@
 //onOffUtility.cpp
 // @yarwinliu, @rt.z, 03122023
 
+#include "main.h"
 #include "error.h"
 #include "constants.h"
 #include "onOffUtility.h"
@@ -8,8 +9,7 @@
 
 //returns true if there is current running to the motor
 bool onPressed(I_no_can_speak_flex &car) {  
-    if(car.DTI.getDCCurrent() > 0) return true;
-    else return false;
+    return (car.DTI.getDCCurrent() > 0);
 }
 
 std::vector<int> startupCheck(I_no_can_speak_flex &car) {
@@ -278,14 +278,6 @@ std::vector<int> startupCheck(I_no_can_speak_flex &car) {
 */
 
     return crit_codes;
-}
-
-volatile bool hasStartupCrits(I_no_can_speak_flex &car) {
-    std::vector<int> crit_codes = startupCheck(car);
-    for (int code : crit_codes) {
-        if (code >= 100) return true;
-    }
-    return false;
 }
 
 bool driveEngaged(I_no_can_speak_flex &car) {

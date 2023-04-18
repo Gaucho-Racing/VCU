@@ -5,16 +5,16 @@
 #include "error.h"
 #include "constants.h"
 #include "stubs.h"
+#include "onOffUtility.h"
 //#include <string>
 //#include <map>
 //#include <vector>, moved to main.h
 //#include <algorithm>
 //#include <queue>
-//#include <iostream>
+#include <iostream>
 //using namespace std;
 
 I_no_can_speak_flex car(true);
-
 
 /*
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -22,8 +22,6 @@ I_no_can_speak_flex car(true);
                 WARNINGS, DASH ONLY ERRORS NO RESOLUTION
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
-
-//Check Warnings for Tires and Suspension. 
 
 // IMPORTANT CHECKS
 volatile bool batteryTempHigh() { return car.BMS.getTemp() > CELL_TEMP_WARN; }
@@ -67,6 +65,24 @@ volatile bool GForceCrash() {
    return sqrt(car.sensors.getLinAccelX()*car.sensors.getLinAccelX() +
                            car.sensors.getLinAccelY()*car.sensors.getLinAccelY() +
                            car.sensors.getLinAccelZ()*car.sensors.getLinAccelZ()) > VALUE_G_FORCE_LIMIT;
+}
+
+// AND ONE MORE JUST TO CHECK WHETHER OR NOT THERE'S STILL CRITS. AT STARTUP -rt.z
+volatile bool hasStartupCrits(I_no_can_speak_flex &car) {
+    std::vector<int> crit_codes = startupCheck(car);
+    for (int code : crit_codes) {
+        if (code >= 100) return true;
+    }
+    return false;
+}
+
+//so it compiles! -rt.z
+void sendDashError(int code) {
+    using namespace std;
+    /*
+        car.sendDashError(int code);
+    */
+    cout << code << " ";
 }
 
 /*
@@ -131,13 +147,12 @@ void BatteryTempHigh_ISR() {
    if(car.BMS.getTemp() > CRITICAL_CELL_TEMP){
       car.DTI.setCurrent(0);
       car.DTI.setDriveEnable({0});
-      car.sendDashError(102);
+      sendDashError(102);
       state = sendToError(state, &batteryTempHigh);
    }
    else {
       // WARNING ONLY
-      car.sendDashError(2);
-
+      sendDashError(2);
       /*
          TODO: FIX
       */
@@ -150,7 +165,7 @@ void BatteryTempHigh_ISR() {
 
 // Interrupt handler for no current
 void NoCurrent_ISR() {
-   car.sendDashError(103);
+   sendDashError(103);
    state = sendToError(state, &noCurrent);
 }
 
@@ -159,7 +174,7 @@ void APPSBSPDCheck_ISR() {
    while(APPSBSPDViolation()){
       car.DTI.setCurrent(0);
       // Send message to Dash
-      car.sendDashError(99); // this will keep sending as long as APPSBSPDViolation() is true. nobody like spam -rt.z
+      sendDashError(99); // this will keep sending as long as APPSBSPDViolation() is true. nobody like spam -rt.z
    }
 }
 
@@ -174,14 +189,14 @@ void HardBrake_ISR() {
 // Interrupt handler for unresponsive throttle
 void UnresponsiveThrottle_ISR() {
    // Send Dash Warning
-   car.sendDashError(104);
+   sendDashError(104);
    state = sendToError(state, &accelUnresponsive);
 }
 
 // Interrupt handler for motor temperature high
 void MotorTempHigh_ISR() {
    if(car.DTI.getMotorTemp() > VALUE_CRITICAL_MOTOR_TEMP){
-      car.sendDashError(105);
+      sendDashError(105);
       state = sendToError(state, &motorTempHigh);
    }
    else {
@@ -189,7 +204,7 @@ void MotorTempHigh_ISR() {
       TODO FIX
       */
       // Give dash warning
-      car.sendDashError(3);
+      sendDashError(3);
       // Limit Motor Current draw
       car.DTI.setMaxCurrent(VALUE_MAX_CURRENT_DRAW_HIGH_MOTOR);
    }
@@ -202,30 +217,28 @@ void NoCAN_ISR() {
 
 // Interrupt handler for current too high
 void CurrentExceeds_ISR() {
-   car.sendDashError(106);
+   sendDashError(106);
    state = sendToError(state, &currentExceeds);
 }
 
 // Interrupt handler for system error
 void SystemError_ISR() {
-   car.sendDashError(100);
+   sendDashError(100);
    state = sendToError(state, &systemError);
 }
 
 // Interrupt handler for insulation fault
 void IMDFault_ISR() {
    // Give dash a critical warning
-   car.sendDashError(107);
+   sendDashError(107);
    state = sendToError(state, &IMDFault);
-
 }
 
 // Interrupt handler for car crash
 void CarCrashed_ISR() {
    // Dash Warning
-   car.sendDashError(108);
+   sendDashError(108);
    state = sendToError(state, &GForceCrash);
-
 }
 
 

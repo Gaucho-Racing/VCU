@@ -12,14 +12,19 @@ States on(I_no_can_speak_flex &car) {
    car.DTI.setRCurrent(0);
    std::vector<int> systems_check = startupCheck(car);
    std::vector<int> error_codes;
+   std::vector<int> off_codes;
    for (int code : systems_check) {
+      if (code == 152 || code == 192 || code == 191 || code == 151) {
+         sendDashError(code);
+         return OFF;
+      }
       if (code >= 100) error_codes.push_back(code);
    }
    if (!error_codes.empty()) {
       for (int code : error_codes) {
          sendDashError(code);
-         return sendToError(ON, &hasStartupCrits);
       }
+      return sendToError(ON, &hasStartupCrits);
    }
 
    //beeper: 5V, 0.5 amps to some pin for 1 second.

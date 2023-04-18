@@ -1,7 +1,8 @@
 #include "main.h"
+
 #include "error.h"
 #include "constants.h"
-#include <iostream>
+//#include <iostream>
 
 States sendToError(volatile States currentState, volatile bool (*erFunc)(void)) {
    errorCheck = erFunc; 
@@ -18,14 +19,6 @@ States error(I_no_can_speak_flex &car, States prevStates, volatile bool (*erChec
     } else {
         return prevStates;
     }
-}
-
-void sendDashError(int code) {
-    using namespace std;
-    /*
-        car.sendDashError(int code);
-    */
-    cout << code << " ";
 }
 
 void TS_WARN_Check(I_no_can_speak_flex &car) {
