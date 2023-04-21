@@ -31,15 +31,6 @@ States drive(I_no_can_speak_flex& car) {
       return ON_READY;
     }
     
-
-    // brake system plausibility check
-    // temporary or redundant
-    // getBrakePressure ????
-    if((car.pedals.getAPPS1()+car.pedals.getAPPS1())/2 > 25 && car.DTI.getBrakeIn() > 0) {
-      car.DTI.setRCurrent(0);
-      return OFF; // STUB - will replace with interrupt
-    }
-    
     // set motor output
     car.DTI.setRCurrent(motorOut((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2, car));   
   
