@@ -27,7 +27,7 @@ float motorOut(float throttle) {
   
 }
 
-States drive(I_no_can_speak_flex cool_boi) {    
+States drive(I_no_can_speak_flex car) {    
     // if throttle not applied
     if(car.pedals.getAPPS() == 0) {
       return ON_READY;
