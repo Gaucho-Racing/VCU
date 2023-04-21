@@ -1,10 +1,6 @@
-//#include "drive.h";
+#include "main.h";
 
-#include "main.h"
-
-//I_no_can_speak_flex car(true);
-
-float motorOut(float throttle) {
+float motorOut(float throttle, I_no_can_speak_flex& car) {
   // i'm assuming throttle is a value between 0 and 100
   // can adjust accordingly later
   
@@ -27,14 +23,17 @@ float motorOut(float throttle) {
   
 }
 
-States drive(I_no_can_speak_flex car) {    
+
+States drive(I_no_can_speak_flex& car) {
+    
     // if throttle not applied
-    if(car.pedals.getAPPS() == 0) {
+    if((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 <= 0.05) {
       return ON_READY;
     }
     
     // set motor output
-    car.DTI.setRCurrent(motorOut(car.pedals.getAPPS()));   
-    
+    car.DTI.setRCurrent(motorOut((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2, car));   
+  
     return DRIVE;
+    
 }

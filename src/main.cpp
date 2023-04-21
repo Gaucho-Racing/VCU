@@ -38,7 +38,7 @@ volatile bool noCurrent() {return car.DTI.getDCCurrent() < VALUE_MIN_CURRENT_THR
 
 //NOTE: Waiting on SCS team for proper way to do this
 volatile bool APPSBSPDViolation() {
-   return car.pedals.getAPPS() > VALUE_APPS_BSPD_THROTTLE && 
+   return (car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 > VALUE_APPS_BSPD_THROTTLE && 
       (car.pedals.getBrakePressure1() > VALUE_MIN_BRAKE_PRESSURE || car.pedals.getBrakePressure2() > VALUE_MIN_BRAKE_PRESSURE);
 }
 
@@ -49,7 +49,7 @@ volatile bool hardBrake() {
 
 
 volatile bool accelUnresponsive() {
-   return car.pedals.getAPPS() > VALUE_APPS_UNRESPONSIVE_MAX && 
+   return (car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 > VALUE_APPS_UNRESPONSIVE_MAX && 
       car.DTI.getDCCurrent() < VALUE_MIN_RESPONSIVE_CURRENT_MOTOR;
 } //TODO LATER FIX THIS SHIT IT IS PROB WRONG
 
