@@ -25,6 +25,8 @@ const float WARN_STARTUP_WHEEL_SPEED = 0.03;
 const float MAX_TIRE_PSI = 50.0;
 const float MIN_TIRE_PSI = 24.0;
 
+const float CHARGING_VOLTAGE = 208; //volts
+
 const int VALUE_MOT_TEMP_MAX = 0;
 const int VALUE_MOT_TEMP_MIN = 0;
 const float VALUE_NO_CURRENT = 0;

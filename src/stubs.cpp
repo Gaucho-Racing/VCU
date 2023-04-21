@@ -27,7 +27,8 @@ States drive(I_no_can_speak_flex &car) {
    return CHARGE_PRECHARGE;
 }
 
-States charge_precharge(I_no_can_speak_flex &car) {
+/*
+States charge_precharge() {
    Serial.println("4");
    return CHARGE_CHARGING;
 }
@@ -41,3 +42,4 @@ States charge_full(I_no_can_speak_flex &car) {
    Serial.println("6");
    return OFF;
 }
+*/
