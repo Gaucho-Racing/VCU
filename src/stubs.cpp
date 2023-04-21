@@ -22,10 +22,6 @@ States on_ready(I_no_can_speak_flex &car) {
 }
 */
 
-States drive(I_no_can_speak_flex &car) {
-   Serial.println("3");
-   return CHARGE_PRECHARGE;
-}
 
 /*
 States charge_precharge() {

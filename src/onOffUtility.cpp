@@ -26,7 +26,7 @@ bool isRejectingStartup(I_no_can_speak_flex &car) {
     }
 
     //191: Accelerator engaged
-    if (car.pedals.getAPPS() > 0) {
+    if ((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 > 0) {
         car.sendDashError(191);
         return true;
     }
