@@ -8,7 +8,7 @@
 void TS_WARN_Check(I_no_can_speak_flex &car) {
    // TIRE PRESSURES AND TEMPERATURES
 
-   //51: Front-right tire tempaerture too high
+   //51: Front-right tire temperature too high
    if (car.sensors.getFRtemp1() > MAX_TIRE_TEMP_C) car.sendDashError(51);
    //52: Front-right tire temperature too low
    if (car.sensors.getFRtemp1() < MIN_TIRE_TEMP_C) car.sendDashError(52);
@@ -25,7 +25,7 @@ void TS_WARN_Check(I_no_can_speak_flex &car) {
    //59: Low Front-right tire pressure
    if (car.sensors.getFRpsi() < MIN_TIRE_PSI) car.sendDashError(59);
 
-   //61: Front-left tire tempaerture too high
+   //61: Front-left tire temperature too high
    if (car.sensors.getFLtemp1() > MAX_TIRE_TEMP_C) car.sendDashError(61);
    //62: Front-left tire temperature too low
    if (car.sensors.getFLtemp1() < MIN_TIRE_TEMP_C) car.sendDashError(62);
@@ -42,7 +42,7 @@ void TS_WARN_Check(I_no_can_speak_flex &car) {
    //69: Low Front-left tire pressure
    if (car.sensors.getFLpsi() < MIN_TIRE_PSI) car.sendDashError(69);
 
-   //71: Rear-right tire tempaerture too high
+   //71: Rear-right tire temperature too high
    if (car.sensors.getRRtemp1() > MAX_TIRE_TEMP_C) car.sendDashError(71);
    //72: Rear-right tire temperature too low
    if (car.sensors.getRRtemp1() < MIN_TIRE_TEMP_C) car.sendDashError(72);
@@ -59,7 +59,7 @@ void TS_WARN_Check(I_no_can_speak_flex &car) {
    //79: Low Rear-right tire presure
    if (car.sensors.getRRpsi() < MIN_TIRE_PSI) car.sendDashError(79);
    
-   //81: Rear-left tire tempaerture too high
+   //81: Rear-left tire temperature too high
    if (car.sensors.getRLtemp1() > MAX_TIRE_TEMP_C) car.sendDashError(81);
    //82: Rear-left tire temperature too low
    if (car.sensors.getRLtemp1() < MIN_TIRE_TEMP_C) car.sendDashError(82);
