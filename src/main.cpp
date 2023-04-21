@@ -1,6 +1,7 @@
 //main.cpp
 // @nikunjparasar, @rt.z, @Th3Will
 
+
 //#include <Arduino.h>, already done in main.h
 //#include <imxrt.h>, moved to main.h
 #include "main.h"
@@ -45,6 +46,7 @@ volatile bool hardBrake() {
    return car.pedals.getBrakePressure1() > VALUE_HARD_BRAKE_LIMIT || 
       car.pedals.getBrakePressure2() > VALUE_HARD_BRAKE_LIMIT;
 }
+
 
 volatile bool accelUnresponsive() {
    return car.pedals.getAPPS() > VALUE_APPS_UNRESPONSIVE_MAX && 
