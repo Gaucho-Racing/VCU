@@ -1,6 +1,5 @@
 #include "main.h";
 
-
 float motorOut(float throttle, I_no_can_speak_flex& car) {
   // i'm assuming throttle is a value between 0 and 100
   // can adjust accordingly later
@@ -32,6 +31,7 @@ States drive(I_no_can_speak_flex& car) {
       return ON_READY;
     }
     
+
     // brake system plausibility check
     // temporary or redundant
     // getBrakePressure ????
@@ -43,4 +43,5 @@ States drive(I_no_can_speak_flex& car) {
     // set motor output
     car.DTI.setRCurrent(motorOut((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2, car));   
   
+
 }
