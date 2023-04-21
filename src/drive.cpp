@@ -25,24 +25,14 @@ float motorOut(float throttle) {
   
 }
 
-States drive(I_no_can_speak_flex cool_boi) {
-  while(1) {
-    
+States drive(I_no_can_speak_flex cool_boi) {    
     // if throttle not applied
     if(car.pedals.getAPPS() == 0) {
       return ON_READY;
     }
     
-    // brake system plausibility check
-    // temporary or redundant
-    // getBrakePressure ????
-    if(car.pedals.getAPPS() > 25 && car.DTI.getBrakeIn() > 0) {
-      car.DTI.setRCurrent(0);
-      return OFF; // STUB - will replace with interrupt
-    }
-    
     // set motor output
     car.DTI.setRCurrent(motorOut(car.pedals.getAPPS()));   
-  
-  }
+    
+    return DRIVE;
 }
