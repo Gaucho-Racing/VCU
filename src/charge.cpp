@@ -24,6 +24,6 @@ States charge_full(I_no_can_speak_flex &car) {
    car.DTI.setRCurrent(0);
    // push charge data to dash
    if (car.charger.getCurrent() > 0 && car.BMS.getChargeState() <= 99) return CHARGE_CHARGING;
-   if (car.charger.getCurrent() < 0) return OFF;
+   if (car.charger.getCurrent() <= 0) return OFF;
    return CHARGE_CHARGING;
 }
