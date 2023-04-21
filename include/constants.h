@@ -1,8 +1,10 @@
 #ifndef CONSTANTS
-#define CONSTANTS
-using namespace std;
-//canIDs
+//constants.h
+// @yarwinliu, @nikunjparasar, @rt.z
 
+#define CONSTANTS
+//using namespace std;
+//canIDs
 
 //thresholds
 /*should be used for checking whether a subsystem is within the healthy limit
@@ -10,6 +12,18 @@ using namespace std;
 const byte CELL_TEMP_WARN = 57; // Deg Centigrade
 const byte CRITICAL_CELL_TEMP = 60;  // Deg Centigrade
 const int CELL_OVERHEAT_CURRENT_LIMIT = 60; //kW
+const int MAX_CAN_DURATION = 1000;
+
+//for TMP check…
+const float MAX_TIRE_TEMP_C = 90.0;
+const float MIN_TIRE_TEMP_C = 10.0;
+const float MAX_BRAKE_TEMP_C = 450.0;
+const float MIN_BRAKE_TEMP_C = 0.0;
+const float SUSPENSION_MAX = 1.0; //stub
+const float SUSPENSION_MIN = -1.0; //stub
+const float WARN_STARTUP_WHEEL_SPEED = 0.03;
+const float MAX_TIRE_PSI = 50.0;
+const float MIN_TIRE_PSI = 24.0;
 
 const float CHARGING_VOLTAGE = 208; //volts
 

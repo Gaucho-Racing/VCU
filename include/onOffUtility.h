@@ -1,15 +1,16 @@
-//onOffUtility.cpp
-// @yarwinliu, @rt.z, 03122023
+//onOffUtility.h
+// @rt.z
 
 #ifndef ON_OFF_UTILITY
 #define ON_OFF_UTILITY
 
-#include "main.h"
 
 //returns true if there is current running to the motor
 bool onPressed(I_no_can_speak_flex &car);
 
-bool* systemsCheck(I_no_can_speak_flex &car);
+bool isRejectingStartup(I_no_can_speak_flex &car);
+bool criticalCheck(I_no_can_speak_flex &car, bool send_dash_errors = true);
+bool warningCheck(I_no_can_speak_flex &car, bool send_dash_warnings = true);
 
 bool driveEngaged(I_no_can_speak_flex &car);
 
