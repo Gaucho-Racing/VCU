@@ -34,5 +34,6 @@ States drive(I_no_can_speak_flex& car) {
     // set motor output
     car.DTI.setRCurrent(motorOut((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2, car));   
   
-
+    return DRIVE;
+    
 }
