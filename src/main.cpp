@@ -142,6 +142,8 @@ void loop() {
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
 
+
+//TEMPERATURE MANAGEMENT IS CONTROLLED BY ORION BMS, THESE ISRs MAY BE REDUNDANT
 // Interrupt handler for battery temperature high
 void BatteryTempHigh_ISR() {
    // CRITICAL
@@ -194,6 +196,8 @@ void UnresponsiveThrottle_ISR() {
    state = sendToError(state, &accelUnresponsive);
 }
 
+//TEMPERATURE MANAGEMENT IS CONTROLLED BY ORION BMS, THESE ISRs MAY BE REDUNDANT
+// NOT SURE FOR MOTOR THOUGH
 // Interrupt handler for motor temperature high
 void MotorTempHigh_ISR() {
    if(car.DTI.getMotorTemp() > VALUE_CRITICAL_MOTOR_TEMP){
