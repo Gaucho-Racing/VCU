@@ -94,6 +94,7 @@ States sendToError(volatile States currentState, volatile bool (*erFunc)(void)) 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
 void loop() {
+    car.readData();
   if(batteryTempHigh()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT0);}
   if(noCurrent()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT2);}
   if(APPSBSPDViolation()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT3);}
@@ -254,6 +255,8 @@ void CarCrashed_ISR() {
 */
 
 void setup() {
+   Serial.begin(9600);
+   car.begin();
 
   //-------SET STATE------------
 
