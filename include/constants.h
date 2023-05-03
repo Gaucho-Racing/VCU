@@ -21,7 +21,7 @@ const float MAX_BRAKE_TEMP_C = 450.0;
 const float MIN_BRAKE_TEMP_C = 0.0;
 const float SUSPENSION_MAX = 1.0; //stub
 const float SUSPENSION_MIN = -1.0; //stub
-const float WARN_STARTUP_WHEEL_SPEED = 0.03;
+const float WARN_STARTUP_WHEEL_SPEED = 0.03;// this is not needed. 
 const float MAX_TIRE_PSI = 50.0;
 const float MIN_TIRE_PSI = 24.0;
 
