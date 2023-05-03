@@ -43,9 +43,6 @@ public:
     // Debug stuffz = Debug(0);
 
 
-    // timer that iterates through lines. 
-    int timerLine = 0;
-
     FakeCar(bool);
     // bool readData();
     // bool readData(INT32U*);

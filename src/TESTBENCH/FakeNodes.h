@@ -68,39 +68,39 @@ struct Inverter1
     }
     
     // get the value from the current line. 
-    long getERPM() {return data[0][timerLine];} 
-    float getDuty() {return data[1][timerLine];} 
-    int getVoltIn() {return data[2][timerLine];}
-    float getACCurrent() {return data[3][timerLine];}
-    float getDCCurrent() {return data[4][timerLine];}
-    float getInvTemp() {return data[5][timerLine];} 
-    float getMotorTemp() {return data[6][timerLine];} 
-    byte getFaults() {return data[7][timerLine];}
-    float getCurrentD() {return data[8][timerLine];}  
-    float getCurrentQ() {return data[9][timerLine];}  
-    byte getThrottleIn() {return data[10][timerLine];}  
-    byte getBrakeIn() {return data[11][timerLine];}  
-    bool getD1() {return data[12][timerLine];}
-    bool getD2() {return data[13][timerLine];}
-    bool getD3() {return data[14][timerLine];}
-    bool getD4() {return data[15][timerLine];}
-    bool getDO1() {return data[16][timerLine];}
-    bool getDO2() {return data[17][timerLine];}  
-    bool getDO3() {return data[18][timerLine];}  
-    bool getDO4() {return data[18][timerLine];}  
-    bool getDriveEnable() {return data[19][timerLine];} 
-    bool getCapTempLim() {return data[20][timerLine];}
-    bool getDCCurrentLim() {return data[21][timerLine];}
-    bool getDriveEnableLim() {return data[22][timerLine];}
-    bool getIgbtAccelTempLim() {return data[23][timerLine];}
-    bool getIgbtTempLim() {return data[24][timerLine];}
-    bool getVoltInLim() {return data[25][timerLine];}
-    bool getMotorAccelTempLim() {return data[26][timerLine];}
-    bool getMotorTempLim() {return data[27][timerLine];}
-    bool getRPMMinLimit() {return data[28][timerLine];}
-    bool getRPMMaxLimit() {return data[29][timerLine];}
-    bool getPowerLimit() {return data[30][timerLine];}
-    unsigned long getAge(){return data[31][timerLine];} //time since last data packet
+    double getERPM() {return data[0][timerLine];} 
+    double getDuty() {return data[1][timerLine];} 
+    double getVoltIn() {return data[2][timerLine];}
+    double getACCurrent() {return data[3][timerLine];}
+    double getDCCurrent() {return data[4][timerLine];}
+    double getInvTemp() {return data[5][timerLine];} 
+    double getMotorTemp() {return data[6][timerLine];} 
+    double getFaults() {return data[7][timerLine];}
+    double getCurrentD() {return data[8][timerLine];}  
+    double getCurrentQ() {return data[9][timerLine];}  
+    double getThrottleIn() {return data[10][timerLine];}  
+    double getBrakeIn() {return data[11][timerLine];}  
+    double getD1() {return data[12][timerLine];}
+    double getD2() {return data[13][timerLine];}
+    double getD3() {return data[14][timerLine];}
+    double getD4() {return data[15][timerLine];}
+    double getDO1() {return data[16][timerLine];}
+    double getDO2() {return data[17][timerLine];}  
+    double getDO3() {return data[18][timerLine];}  
+    double getDO4() {return data[18][timerLine];}  
+    double getDriveEnable() {return data[19][timerLine];} 
+    double getCapTempLim() {return data[20][timerLine];}
+    double getDCCurrentLim() {return data[21][timerLine];}
+    double getDriveEnableLim() {return data[22][timerLine];}
+    double getIgbtAccelTempLim() {return data[23][timerLine];}
+    double getIgbtTempLim() {return data[24][timerLine];}
+    double getVoltInLim() {return data[25][timerLine];}
+    double getMotorAccelTempLim() {return data[26][timerLine];}
+    double getMotorTempLim() {return data[27][timerLine];}
+    double getRPMMinLimit() {return data[28][timerLine];}
+    double getRPMMaxLimit() {return data[29][timerLine];}
+    double getPowerLimit() {return data[30][timerLine];}
+    double getAge(){return data[31][timerLine];} //time since last data packet
 
     void setCurrent(float in){}          
     void setBrakeCurrent(float in) {}    
@@ -128,16 +128,16 @@ struct Battery1 ///done for now
 
     Battery1(string filename){
         data = read_csv(filename);
-\
+
     }
-    float getCurrent() {return data[0][timerLine];}  //Signed current [-3276.7, 3276.7]
-    float getVoltage() {return data[1][timerLine];}  //Unsigned voltage [0, 6553.5]
-    float getChargeState() {return data[2][timerLine];}  //Percent [0, 100]
-    byte getHealth() {return data[3][timerLine];}  //Percent [0, 100]
-    byte getTemp() {return data[4][timerLine];}  //Degrees Celcius [-40, 80]
-    float getCellVoltage() {return data[5][timerLine];}  //Volts [0, 5]
-    float getOCellVoltage() {return data[6][timerLine];}  //Volts [0, 5]
-    unsigned long getAge(){return data[7][timerLine];} //time since last data packet
+    double getCurrent() {return data[0][timerLine];}  //Signed current [-3276.7, 3276.7]
+    double getVoltage() {return data[1][timerLine];}  //Unsigned voltage [0, 6553.5]
+    double getChargeState() {return data[2][timerLine];}  //Percent [0, 100]
+    double getHealth() {return data[3][timerLine];}  //Percent [0, 100]
+    double getTemp() {return data[4][timerLine];}  //Degrees Celcius [-40, 80]
+    double getCellVoltage() {return data[5][timerLine];}  //Volts [0, 5]
+    double getOCellVoltage() {return data[6][timerLine];}  //Volts [0, 5]
+    double getAge(){return data[7][timerLine];} //time since last data packet
 
 };
 
@@ -154,15 +154,15 @@ struct Isolation_Monitor1 // needs to be on a different bus
     }
  
 
-    boolean getIsolation() {return data[0][timerLine];} //true: Status ok, false: fail/warning
-    byte getIsolationStates() {return data[1][timerLine];} //00:Ok, 01: status unknown, 10: warning, 11: fault
-    boolean getHardware_Error() {return data[2][timerLine];}
-    boolean getTouch_energy_fault() {return data[3][timerLine];}
-    boolean getHigh_Uncertainty() {return data[4][timerLine];}
-    boolean getExc_off() {return data[5][timerLine];}
-    boolean getHigh_Battery_Voltage() {return data[6][timerLine];}
-    boolean getLow_Battery_Voltage() {return data[7][timerLine];;}
-    unsigned long getAge(){return data[8][timerLine];} //time since last data packet
+    double getIsolation() {return data[0][timerLine];} //true: Status ok, false: fail/warning
+    double getIsolationStates() {return data[1][timerLine];} //00:Ok, 01: status unknown, 10: warning, 11: fault
+    double getHardware_Error() {return data[2][timerLine];}
+    double getTouch_energy_fault() {return data[3][timerLine];}
+    double getHigh_Uncertainty() {return data[4][timerLine];}
+    double getExc_off() {return data[5][timerLine];}
+    double getHigh_Battery_Voltage() {return data[6][timerLine];}
+    double getLow_Battery_Voltage() {return data[7][timerLine];;}
+    double getAge(){return data[8][timerLine];} //time since last data packet
 };
 
 
@@ -176,10 +176,10 @@ struct Charger1
         data = read_csv(filename);
     }
 
-    float getVoltage() {return data[0][timerLine];} //Charge voltage
-    float getCurrent() {return data[1][timerLine];} //Charge current
-    byte getStatus() {return data[2][timerLine];} //0:Undefined  1:Working  2:Stop  3:Stop or Standby
-    unsigned long getAge(){return data[3][timerLine];} //Cycle time is 1 sec //time since last data packet
+    double getVoltage() {return data[0][timerLine];} //Charge voltage
+    double getCurrent() {return data[1][timerLine];} //Charge current
+    double getStatus() {return data[2][timerLine];} //0:Undefined  1:Working  2:Stop  3:Stop or Standby
+    double getAge(){return data[3][timerLine];} //Cycle time is 1 sec //time since last data packet
 };
 
 
@@ -191,41 +191,41 @@ struct Sensors1 //TODO:   use the scaling thing
         data = read_csv(filename);
     }
 
-    float getLatitude() {return data[0][timerLine];}
-    float getLatitudeHP() {return data[1][timerLine];}
-    float getLongitude() {return data[2][timerLine];}
-    float getLongitudeHP() {return data[3][timerLine];}
-    float getGPSPrecision() {return data[4][timerLine];} //Units: mm
-    float getLinAccelX() {return data[5][timerLine];}
-    float getLinAccelY() {return data[6][timerLine];}//change scaling
-    float getLinAccelZ() {return data[7][timerLine];}//change scaling
-    float getAbsOrenX() {return data[8][timerLine];}//change scaling
-    float getAbsOrenY() {return data[9][timerLine];}//change scaling
-    float getAbsOrenZ() {return data[10][timerLine];}//change scaling
-    float getAngVeloX() {return data[11][timerLine];}//change scaling
-    float getAngVeloY() {return data[12][timerLine];}//change scaling
-    float getAngVeloZ() {return data[13][timerLine];}//change scaling
-    float getFRtemp1() {return data[14][timerLine];}//change scaling
-    float getFRtemp2() {return data[15][timerLine];}//change scaling
-    float getFRtravel() {return data[16][timerLine];}//change scaling
-    float getFRspeed() {return data[17][timerLine];}//change scaling
-    float getFRpsi() {return data[18][timerLine];}//change scaling
-    float getFLtemp1() {return data[19][timerLine];}//change scaling
-    float getFLtemp2() {return data[20][timerLine];}//change scaling
-    float getFLtravel() {return data[21][timerLine];}//change scaling
-    float getFLspeed() {return data[22][timerLine];}//change scaling
-    float getFLpsi() {return data[23][timerLine];}//change scaling
-    float getRRtemp1() {return data[24][timerLine];}//change scaling
-    float getRRtemp2() {return data[25][timerLine];}//change scaling
-    float getRRtravel() {return data[26][timerLine];}//change scaling
-    float getRRspeed() {return data[27][timerLine];}//change scaling
-    float getRRpsi() {return data[28][timerLine];}//change scaling
-    float getRLtemp1() {return data[0][timerLine];}//change scaling
-    float getRLtemp2() {return data[29][timerLine];}//change scaling
-    float getRLtravel() {return data[30][timerLine];}//change scaling
-    float getRLspeed() {return data[31][timerLine];}//change scaling
-    float getRLpsi() {return data[32][timerLine];}//change scaling
-    unsigned long getAge(){return data[33][timerLine];} //time since last data packet
+    double getLatitude() {return data[0][timerLine];}
+    double getLatitudeHP() {return data[1][timerLine];}
+    double getLongitude() {return data[2][timerLine];}
+    double getLongitudeHP() {return data[3][timerLine];}
+    double getGPSPrecision() {return data[4][timerLine];} //Units: mm
+    double getLinAccelX() {return data[5][timerLine];}
+    double getLinAccelY() {return data[6][timerLine];}//change scaling
+    double getLinAccelZ() {return data[7][timerLine];}//change scaling
+    double getAbsOrenX() {return data[8][timerLine];}//change scaling
+    double getAbsOrenY() {return data[9][timerLine];}//change scaling
+    double getAbsOrenZ() {return data[10][timerLine];}//change scaling
+    double getAngVeloX() {return data[11][timerLine];}//change scaling
+    double getAngVeloY() {return data[12][timerLine];}//change scaling
+    double getAngVeloZ() {return data[13][timerLine];}//change scaling
+    double getFRtemp1() {return data[14][timerLine];}//change scaling
+    double getFRtemp2() {return data[15][timerLine];}//change scaling
+    double getFRtravel() {return data[16][timerLine];}//change scaling
+    double getFRspeed() {return data[17][timerLine];}//change scaling
+    double getFRpsi() {return data[18][timerLine];}//change scaling
+    double getFLtemp1() {return data[19][timerLine];}//change scaling
+    double getFLtemp2() {return data[20][timerLine];}//change scaling
+    double getFLtravel() {return data[21][timerLine];}//change scaling
+    double getFLspeed() {return data[22][timerLine];}//change scaling
+    double getFLpsi() {return data[23][timerLine];}//change scaling
+    double getRRtemp1() {return data[24][timerLine];}//change scaling
+    double getRRtemp2() {return data[25][timerLine];}//change scaling
+    double getRRtravel() {return data[26][timerLine];}//change scaling
+    double getRRspeed() {return data[27][timerLine];}//change scaling
+    double getRRpsi() {return data[28][timerLine];}//change scaling
+    double getRLtemp1() {return data[0][timerLine];}//change scaling
+    double getRLtemp2() {return data[29][timerLine];}//change scaling
+    double getRLtravel() {return data[30][timerLine];}//change scaling
+    double getRLspeed() {return data[31][timerLine];}//change scaling
+    double getRLpsi() {return data[32][timerLine];}//change scaling
+    double getAge(){return data[33][timerLine];} //time since last data packet
 };
 
 
@@ -238,12 +238,12 @@ struct Sensors_Pedals1
         data = read_csv(filename);
     }
 
-    float getAPPS1() {return data[0][timerLine];} //Pedal position [0-100]
-    float getAPPS2() {return data[1][timerLine];} //Pedal position [0-100]
-    boolean getBrakeLimit() {return data[2][timerLine];} //Might not work?
-    int getBrakePressure1() {return data[3][timerLine];} //psi
-    int getBrakePressure2() {return data[4][timerLine];} //psi
-    unsigned long getAge(){return data[5][timerLine];} //time since last data packet
+    double getAPPS1() {return data[0][timerLine];} //Pedal position [0-100]
+    double getAPPS2() {return data[1][timerLine];} //Pedal position [0-100]
+    double getBrakeLimit() {return data[2][timerLine];} //Might not work?
+    double getBrakePressure1() {return data[3][timerLine];} //psi
+    double getBrakePressure2() {return data[4][timerLine];} //psi
+    double getAge(){return data[5][timerLine];} //time since last data packet
 };
 
 
