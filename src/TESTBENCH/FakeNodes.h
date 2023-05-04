@@ -176,7 +176,7 @@ struct Isolation_Monitor1 // needs to be on a different bus
     double getHigh_Uncertainty() {return data[4][timerLine];}
     double getExc_off() {return data[5][timerLine];}
     double getHigh_Battery_Voltage() {return data[6][timerLine];}
-    double getLow_Battery_Voltage() {return data[7][timerLine];;}
+    double getLow_Battery_Voltage() {return data[7][timerLine];}
     double getAge(){return data[8][timerLine];} //time since last data packet
 };
 
