@@ -40,22 +40,37 @@ vector<vector<double>> read_csv(string filename) {
     if (infile.is_open()) {
         string line;
         getline(infile, line); // skip first line
+        vector<vector<double>> columns;
+        int num_cols = 0;
         while (getline(infile, line)) {
-            vector<double> row;
             stringstream ss(line);
             string field;
+            int col_index = 0;
             while (getline(ss, field, ',')) {
                 double value = stod(field);
-                row.push_back(value);
+                if (col_index >= num_cols) {
+                    columns.push_back(vector<double>());
+                    num_cols++;
+                }
+                columns[col_index].push_back(value);
+                col_index++;
             }
-            data.push_back(row);
         }
         infile.close();
+        // Transpose the columns into rows
+        data.resize(num_cols);
+        for (int i = 0; i < num_cols; i++) {
+            data[i].resize(columns[i].size());
+            for (int j = 0; j < columns[i].size(); j++) {
+                data[i][j] = columns[i][j];
+            }
+        }
     } else {
         Serial.println("Error opening file");
     }
     return data;
 }
+
 
 
 struct Inverter1 
