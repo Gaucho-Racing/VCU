@@ -10,7 +10,6 @@
 //check for all conditions to allow for ON_READY
 States on(I_no_can_speak_flex &car) {
    car.DTI.setRCurrent(0);
-   if (isRejectingStartup(car)) return OFF;
    if (criticalCheck(car)) return ERROR;
    warningCheck(car);
 
