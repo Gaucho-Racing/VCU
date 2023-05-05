@@ -16,9 +16,11 @@ States off(I_no_can_speak_flex &car) {
     }
     if (!onPressed(car) && !isRejectingStartup(car)) rejectStartup = false;
 
+    /*
     if(car.BMS.getCurrent() > 0) {
         return CHARGE_PRECHARGE;
     } 
+    */
     
     return OFF;
 }
