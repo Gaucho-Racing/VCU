@@ -24,12 +24,6 @@ volatile bool (*errorCheck)(void);
 
 I_no_can_speak_flex car(true);
 
-/*
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        
-                WARNINGS, DASH ONLY ERRORS NO RESOLUTION
-++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-*/
 
 // IMPORTANT CHECKS
 volatile bool batteryTempHigh() { return car.BMS.getTemp() > CELL_TEMP_WARN; }
@@ -94,6 +88,7 @@ States sendToError(volatile States currentState, volatile bool (*erFunc)(void)) 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
 void loop() {
+  car.readData();
   if(batteryTempHigh()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT0);}
   if(noCurrent()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT2);}
   if(APPSBSPDViolation()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT3);}
@@ -136,34 +131,36 @@ void loop() {
          state = error(car, prevState, errorCheck);
          break;
    }
+
 }
 
 /*
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                       HIGH PRIORITY INTERRUPT SERVICE ROUTINES 
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
 
+
+//TEMPERATURE MANAGEMENT IS CONTROLLED BY ORION BMS, THESE ISRs MAY BE REDUNDANT
 // Interrupt handler for battery temperature high
 void BatteryTempHigh_ISR() {
-   // CRITICAL
-   if(car.BMS.getTemp() > CRITICAL_CELL_TEMP){
-      car.DTI.setCurrent(0);
-      car.DTI.setDriveEnable({0});
-      car.sendDashError(102);
-      state = sendToError(state, &batteryTempHigh);
-   }
-   else {
-      // WARNING ONLY
-      car.sendDashError(2);
-      /*
-         TODO: FIX
-      */
-      // Limit Motor Current Draw
-      car.DTI.setMaxCurrent(CELL_OVERHEAT_CURRENT_LIMIT);
-      // TODO: WAY TO RESTORE MAX CURRENT ONCE NOT OVERHEATING
-   }
-   
+   // // CRITICAL
+   // if(car.BMS.getTemp() > CRITICAL_CELL_TEMP){
+   //    car.DTI.setCurrent(0);
+   //    car.DTI.setDriveEnable({0});
+   //    car.sendDashError(102);
+   //    state = sendToError(state, &batteryTempHigh);
+   // }
+   // else {
+   //    // WARNING ONLY
+   //    car.sendDashError(2);
+   //    /*
+   //       TODO: FIX
+   //    */
+   //    // Limit Motor Current Draw
+   //    car.DTI.setMaxCurrent(CELL_OVERHEAT_CURRENT_LIMIT);
+   //    // TODO: WAY TO RESTORE MAX CURRENT ONCE NOT OVERHEATING
+   // }
 }
 
 // Interrupt handler for no current
@@ -196,26 +193,28 @@ void UnresponsiveThrottle_ISR() {
    state = sendToError(state, &accelUnresponsive);
 }
 
+//TEMPERATURE MANAGEMENT IS CONTROLLED BY ORION BMS, THESE ISRs MAY BE REDUNDANT
+// NOT SURE FOR MOTOR THOUGH
 // Interrupt handler for motor temperature high
 void MotorTempHigh_ISR() {
-   if(car.DTI.getMotorTemp() > VALUE_CRITICAL_MOTOR_TEMP){
-      car.sendDashError(105);
-      state = sendToError(state, &motorTempHigh);
-   }
-   else {
-      /*
-      TODO FIX
-      */
-      // Give dash warning
-      car.sendDashError(3);
-      // Limit Motor Current draw
-      car.DTI.setMaxCurrent(VALUE_MAX_CURRENT_DRAW_HIGH_MOTOR);
-   }
+   // if(car.DTI.getMotorTemp() > VALUE_CRITICAL_MOTOR_TEMP){
+   //    car.sendDashError(105);
+   //    state = sendToError(state, &motorTempHigh);
+   // }
+   // else {
+   //    /*
+   //    TODO FIX
+   //    */
+   //    // Give dash warning
+   //    car.sendDashError(3);
+   //    // Limit Motor Current draw
+   //    car.DTI.setMaxCurrent(VALUE_MAX_CURRENT_DRAW_HIGH_MOTOR);
+   // }
 }
 
 // Interrupt handler for no CAN signal
 void NoCAN_ISR() {
-   // IDK Shut down? Yup. -rt.z
+   // IDK Shut down? 
 }
 
 // Interrupt handler for current too high
@@ -252,6 +251,8 @@ void CarCrashed_ISR() {
 */
 
 void setup() {
+   Serial.begin(9600);
+   car.begin();
 
   //-------SET STATE------------
 
