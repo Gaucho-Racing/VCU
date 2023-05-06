@@ -116,6 +116,7 @@ void loop() {
       case DRIVE:
          state = drive(car);
          break;
+      /*
       case CHARGE_PRECHARGE:
          state = charge_precharge(car);
          break;
@@ -125,6 +126,7 @@ void loop() {
       case CHARGE_FULL:
          state = charge_full(car);
          break;
+      */
       case ERROR:
          state = error(car, prevState, errorCheck);
          break;

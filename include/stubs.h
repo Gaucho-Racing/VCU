@@ -18,10 +18,12 @@ States on_ready(I_no_can_speak_flex &car);
 
 States drive(I_no_can_speak_flex &car);
 
+/*
 States charge_precharge(I_no_can_speak_flex &car);
 
 States charge_charging(I_no_can_speak_flex &car);
 
 States charge_full(I_no_can_speak_flex &car);
+*/
 
 #endif
