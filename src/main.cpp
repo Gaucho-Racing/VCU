@@ -23,7 +23,7 @@ volatile States prevState;
 volatile bool (*errorCheck)(void); 
 
 I_no_can_speak_flex car(true);
-
+int apps_implausibility_time = 0, bse_implausibility_time = 0;
 
 // IMPORTANT CHECKS
 volatile bool batteryTempHigh() { return car.BMS.getTemp() > CELL_TEMP_WARN; }
@@ -34,6 +34,10 @@ volatile bool noCurrent() {return car.DTI.getDCCurrent() < VALUE_MIN_CURRENT_THR
 volatile bool APPSBSPDViolation() {
    return (car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 > VALUE_APPS_BSPD_THROTTLE && 
       (car.pedals.getBrakePressure1() > VALUE_MIN_BRAKE_PRESSURE || car.pedals.getBrakePressure2() > VALUE_MIN_BRAKE_PRESSURE);
+}
+
+volatile bool CanReturnFromAPPSBSPD() {
+   return (car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 < VALUE_APPS_BSPD_RETURN;
 }
 
 volatile bool hardBrake() {
@@ -89,17 +93,35 @@ States sendToError(volatile States currentState, volatile bool (*erFunc)(void)) 
 */
 void loop() {
   car.readData();
-  if(batteryTempHigh()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT0);}
-  if(noCurrent()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT2);}
-  if(APPSBSPDViolation()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT3);}
-  if(hardBrake()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT4);}
-  if(accelUnresponsive()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT5);}
-  if(motorTempHigh()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT6);}
-  if(CANFailure()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT7);}
-  if(currentExceeds()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_0_15);}
-  if(systemError()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_16_31);}
-  if(IMDFault()){NVIC_TRIGGER_IRQ(IRQ_GPIO2_0_15);}
-  if(GForceCrash()){NVIC_TRIGGER_IRQ(IRQ_GPIO2_16_31);}
+   if(batteryTempHigh()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT0);}
+   if(noCurrent()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT2);}
+   if(APPSBSPDViolation()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT3);}
+   if(hardBrake()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT4);}
+   if(accelUnresponsive()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT5);}
+   if(motorTempHigh()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT6);}
+   if(CANFailure()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT7);}
+   if(currentExceeds()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_0_15);}
+   if(systemError()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_16_31);}
+   if(IMDFault()){NVIC_TRIGGER_IRQ(IRQ_GPIO2_0_15);}
+   if(GForceCrash()){NVIC_TRIGGER_IRQ(IRQ_GPIO2_16_31);}
+   if (abs(car.pedals.getAPPS1() - car.pedals.getAPPS2()) >= 10) {
+      apps_implausibility_time += car.pedals.getAge();
+      if (apps_implausibility_time >= 100) {
+         car.DTI.setRCurrent(0);
+         return;
+      } else {
+         apps_implausibility_time = 0;
+      }
+   }
+   if (car.pedals.getBrakeLimit()) {
+      bse_implausibility_time += car.pedals.getAge();
+      if (bse_implausibility_time >= 100) {
+         car.DTI.setRCurrent(0);
+         return;
+      } else {
+         bse_implausibility_time = 0;
+      }
+   }
 
   TS_WARN_Check(car);
 
@@ -171,10 +193,10 @@ void NoCurrent_ISR() {
 
 // Interrupt handler for accelerator and brakes
 void APPSBSPDCheck_ISR() {
-   while(APPSBSPDViolation()){
+   car.sendDashError(99);
+   while(!CanReturnFromAPPSBSPD() && driveEngaged(car)){
       car.DTI.setCurrent(0);
       // Send message to Dash
-      car.sendDashError(99); // this will keep sending as long as APPSBSPDViolation() is true. nobody like spam -rt.z
    }
 }
 
