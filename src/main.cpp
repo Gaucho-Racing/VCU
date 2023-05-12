@@ -23,7 +23,7 @@ volatile States prevState;
 volatile bool (*errorCheck)(void); 
 
 I_no_can_speak_flex car(true);
-
+int apps_implausibility_time = 0, bse_implausibility_time = 0;
 
 // IMPORTANT CHECKS
 volatile bool batteryTempHigh() { return car.BMS.getTemp() > CELL_TEMP_WARN; }
@@ -82,6 +82,14 @@ States sendToError(volatile States currentState, volatile bool (*erFunc)(void)) 
    return ERROR;
 }
 
+void criticalBeeps() {
+   car.DTI.setCurrent(0);
+   digitalWrite(3, HIGH);
+   delay(1000);
+   digitalWrite(3, LOW);
+
+}
+
 /*
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                           MAIN LOOP
@@ -89,17 +97,35 @@ States sendToError(volatile States currentState, volatile bool (*erFunc)(void)) 
 */
 void loop() {
   car.readData();
-  if(batteryTempHigh()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT0);}
-  if(noCurrent()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT2);}
-  if(APPSBSPDViolation()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT3);}
-  if(hardBrake()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT4);}
-  if(accelUnresponsive()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT5);}
-  if(motorTempHigh()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT6);}
-  if(CANFailure()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT7);}
-  if(currentExceeds()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_0_15);}
-  if(systemError()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_16_31);}
-  if(IMDFault()){NVIC_TRIGGER_IRQ(IRQ_GPIO2_0_15);}
-  if(GForceCrash()){NVIC_TRIGGER_IRQ(IRQ_GPIO2_16_31);}
+   if(batteryTempHigh()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT0);}
+   if(noCurrent()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT2);}
+   if(APPSBSPDViolation()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT3);}
+   if(hardBrake()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT4);}
+   if(accelUnresponsive()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT5);}
+   if(motorTempHigh()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT6);}
+   if(CANFailure()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT7);}
+   if(currentExceeds()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_0_15);}
+   if(systemError()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_16_31);}
+   if(IMDFault()){NVIC_TRIGGER_IRQ(IRQ_GPIO2_0_15);}
+   if(GForceCrash()){NVIC_TRIGGER_IRQ(IRQ_GPIO2_16_31);}
+   if (abs(car.pedals.getAPPS1() - car.pedals.getAPPS2()) >= 10) {
+      apps_implausibility_time += car.pedals.getAge();
+      if (apps_implausibility_time >= 100) {
+         car.DTI.setRCurrent(0);
+         return;
+      } else {
+         apps_implausibility_time = 0;
+      }
+   }
+   if (car.pedals.getBrakeLimit()) {
+      bse_implausibility_time += car.pedals.getAge();
+      if (bse_implausibility_time >= 100) {
+         car.DTI.setRCurrent(0);
+         return;
+      } else {
+         bse_implausibility_time = 0;
+      }
+   }
 
   TS_WARN_Check(car);
 
