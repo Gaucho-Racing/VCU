@@ -14,6 +14,9 @@ States on(I_no_can_speak_flex &car) {
    warningCheck(car);
 
    //beeper: 5V, 0.5 amps to some pin for 1 second.
+   digitalWrite(3, HIGH);
+   delay(1000);
+   digitalWrite(3, LOW);
    return ON_READY;
 
    /*

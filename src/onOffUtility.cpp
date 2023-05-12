@@ -214,6 +214,5 @@ bool warningCheck(I_no_can_speak_flex &car, bool send_dash_warnings = true) {
 }
 
 bool driveEngaged(I_no_can_speak_flex &car) {
-    //TODO: find how to get dash signals from the CAN
-    return true;
+    return digitalRead(4);
 }

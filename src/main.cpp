@@ -254,6 +254,9 @@ void setup() {
    Serial.begin(9600);
    car.begin();
 
+   //set beeper pin to output mode
+   pinMode(3, OUTPUT);
+
   //-------SET STATE------------
 
    state = OFF;
