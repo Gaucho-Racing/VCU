@@ -32,7 +32,7 @@ bool isRejectingStartup(I_no_can_speak_flex &car) {
     }
     
     //192: Brakes not engaged upon startup
-    if (car.pedals.getBrakePressure1() != 0 || car.pedals.getBrakePressure2() != 0) {
+    if (car.pedals.getBrakePressure1() < 50 || car.pedals.getBrakePressure2() < 50) {
         car.sendDashError(192);
         return true;
     }
