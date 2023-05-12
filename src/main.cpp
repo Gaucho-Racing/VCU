@@ -86,6 +86,14 @@ States sendToError(volatile States currentState, volatile bool (*erFunc)(void)) 
    return ERROR;
 }
 
+void criticalBeeps() {
+   car.DTI.setCurrent(0);
+   digitalWrite(3, HIGH);
+   delay(1000);
+   digitalWrite(3, LOW);
+
+}
+
 /*
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                           MAIN LOOP
