@@ -110,16 +110,16 @@ void loop() {
    
 
 
-//   if(APPSBSPDViolation()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT3);}
-//   if(hardBrake()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT4);}
-//   if(accelUnresponsive()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT5);}
-//   if(motorTempHigh()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT6);}
-//   if(CANFailure()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT7);}
-//   if(currentExceeds()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_0_15);}
-//   if(GForceCrash()){NVIC_TRIGGER_IRQ(IRQ_GPIO2_16_31);}
+  if(APPSBSPDViolation()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT3);}
+  if(hardBrake()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT4);}
+  if(accelUnresponsive()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT5);}
+  if(motorTempHigh()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT6);}
+  if(CANFailure()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT7);}
+  if(currentExceeds()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_0_15);}
+  if(GForceCrash()){NVIC_TRIGGER_IRQ(IRQ_GPIO2_16_31);}
 
 
-//   TS_WARN_Check(car);
+  TS_WARN_Check(car);
 
    //NOTE:
 
