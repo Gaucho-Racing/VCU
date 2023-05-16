@@ -6,7 +6,7 @@
 
 #include <string>
 
-void TS_WARN_Check(I_no_can_speak_flex &car);
+void TS_WARN_Check(FakeCar &car);
 
 //need extern to modify across files apparently
 struct carFailure {

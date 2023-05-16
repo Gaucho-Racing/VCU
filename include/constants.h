@@ -21,23 +21,23 @@ const float MAX_BRAKE_TEMP_C = 450.0;
 const float MIN_BRAKE_TEMP_C = 0.0;
 const float SUSPENSION_MAX = 1.0; //stub
 const float SUSPENSION_MIN = -1.0; //stub
-const float WARN_STARTUP_WHEEL_SPEED = 0.03;// this is not needed. 
+const float WARN_STARTUP_WHEEL_SPEED = 0.03;
 const float MAX_TIRE_PSI = 50.0;
 const float MIN_TIRE_PSI = 24.0;
 
 const float CHARGING_VOLTAGE = 208; //volts
 
-const int VALUE_MOT_TEMP_MAX = 0;
+const int VALUE_MOT_TEMP_MAX = 2000;
 const int VALUE_MOT_TEMP_MIN = 0;
 const float VALUE_NO_CURRENT = 0;
-const float VALUE_APPS_BSPD_THROTTLE = 0.25;
-const int VALUE_MIN_BRAKE_PRESSURE = 0;
+const float VALUE_APPS_BSPD_THROTTLE = 25;
+const int VALUE_MIN_BRAKE_PRESSURE = 50;
 const float VALUE_MIN_CURRENT_THRESHOLD = 0;
-const int VALUE_HARD_BRAKE_LIMIT = 0;
-const float VALUE_APPS_UNRESPONSIVE_MAX = 0;
+const int VALUE_HARD_BRAKE_LIMIT = 1700;
+const float VALUE_APPS_UNRESPONSIVE_MAX = 10;
 const byte VALUE_CRITICAL_MOTOR_TEMP = 0;
 const float VALUE_MIN_RESPONSIVE_CURRENT_MOTOR = 0;
-const float VALUE_DTI_CURRENT_THRESHOLD = 0;
+const float VALUE_DTI_CURRENT_THRESHOLD = 600;
 const float VALUE_G_FORCE_LIMIT = 0;
 
 const float VALUE_MAX_CURRENT_DRAW_HIGH_MOTOR = 0;

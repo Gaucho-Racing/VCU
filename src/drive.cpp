@@ -1,6 +1,6 @@
 #include "main.h";
 
-float motorOut(float throttle, I_no_can_speak_flex& car) {
+float motorOut(float throttle, FakeCar& car) {
   // i'm assuming throttle is a value between 0 and 100
   // can adjust accordingly later
   
@@ -11,7 +11,8 @@ float motorOut(float throttle, I_no_can_speak_flex& car) {
 
   // wheels slipping: traction control
   // multiplied by 10 is because of some CAN scaling shit
-  if (rear > front) {
+
+  if ( rear > front) {
     // adjust 0.1 factor in testing
     // also add threshold for it to turn on
     return 10 * (throttle - 0.1 * (rear - front));
@@ -24,7 +25,7 @@ float motorOut(float throttle, I_no_can_speak_flex& car) {
 }
 
 
-States drive(I_no_can_speak_flex& car) {
+States drive(FakeCar& car, Switchboard& s) {
     
     // if throttle not applied
     if((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 <= 0.05) {

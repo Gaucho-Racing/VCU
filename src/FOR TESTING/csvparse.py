@@ -1,6 +1,6 @@
 import csv
 
-filename = 'RANDOM/INVERTER.csv'
+filename = 'batt.csv'
 
 with open(filename, newline='') as csvfile:
     reader = csv.reader(csvfile, delimiter=',', quotechar='"')
