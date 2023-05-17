@@ -7,12 +7,14 @@
 States off(FakeCar &car, Switchboard& s) {
     // Serial.println("OFF");
     
+    led.clear();
+    led.show();
     
     if(s.drive_enable) {
         for(int i = 0; i < 4; i++){
             led.setPixelColor(i, led.Color(148, 0, 247));
             led.show();
-            delay(500);
+            delay(100);
         }
         led.clear();
         led.setPixelColor(0, led.Color(66, 247, 0));

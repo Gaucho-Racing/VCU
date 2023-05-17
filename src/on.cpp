@@ -9,12 +9,14 @@
 //Read info from can and send to dashboard, 
 //check for all conditions to allow for ON_READY
 States on(FakeCar &car, Switchboard& s) {
-   Serial.println("ON STATE");
+   // Serial.println("ON STATE");
+
+   if(!s.drive_enable) return OFF;
    // car.DTI.setRCurrent(0);
-   led.setPixelColor(0, led.Color(5, 218, 255));
-   led.setPixelColor(1, led.Color(5, 218, 255));
-   led.setPixelColor(2, led.Color(5, 218, 255));
-   led.setPixelColor(3, led.Color(5, 218, 255));
+   led.setPixelColor(0, led.Color(0, 255, 179));
+   led.setPixelColor(1, led.Color(0, 255, 179));
+   led.setPixelColor(2, led.Color(0, 255, 179));
+   led.setPixelColor(3, led.Color(0, 255, 179));
    led.show();
 
   
@@ -38,13 +40,13 @@ States on(FakeCar &car, Switchboard& s) {
          led.setPixelColor(2, led.Color(0, 255, 13));
          led.setPixelColor(3, led.Color(0, 255, 13));
          led.show();
-         delay(500);
+         delay(100);
          led.setPixelColor(0, led.Color(0, 0, 0));
          led.setPixelColor(1, led.Color(0, 0, 0));
          led.setPixelColor(2, led.Color(0, 0, 0));
          led.setPixelColor(3, led.Color(0, 0, 0));
          led.show();
-         delay(500);
+         delay(100);
       }
       led.clear();
       led.show();
