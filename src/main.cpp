@@ -17,7 +17,6 @@ volatile bool (*errorCheck)(void);
 //I_no_can_speak_flex car(true);
 int apps_implausibility_time = 0, bse_implausibility_time = 0;
 
-volatile bool (*errorCheck)(void); 
 Switchboard s;
 FakeCar car(true); 
 const int on_off_pin = 12;
@@ -113,17 +112,13 @@ void criticalBeeps() {
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
 void loop() {
-  car.readData();
-   if(batteryTempHigh()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT0);}
-   if(noCurrent()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT2);}
+//   car.readData();
    if(APPSBSPDViolation()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT3);}
    if(hardBrake()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT4);}
    if(accelUnresponsive()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT5);}
    if(motorTempHigh()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT6);}
    if(CANFailure()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT7);}
    if(currentExceeds()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_0_15);}
-   if(systemError()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_16_31);}
-   if(IMDFault()){NVIC_TRIGGER_IRQ(IRQ_GPIO2_0_15);}
    if(GForceCrash()){NVIC_TRIGGER_IRQ(IRQ_GPIO2_16_31);}
    if(APPSImplausibility()) {
       car.sendDashError(97);
@@ -225,7 +220,7 @@ void loop() {
 // Interrupt handler for accelerator and brakes
 void APPSBSPDCheck_ISR() {
    car.sendDashError(99);
-   if (!CanReturnFromAPPSBSPD() && driveEngaged(car)){
+   if (!CanReturnFromAPPSBSPD() && s.drive_engage){
       car.DTI.setRCurrent(0);
       // Send message to Dash
    }
