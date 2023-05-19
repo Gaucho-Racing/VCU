@@ -113,24 +113,24 @@ void criticalBeeps() {
 */
 void loop() {
 //   car.readData();
-   if(APPSBSPDViolation()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT3);}
-   if(hardBrake()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT4);}
-   if(accelUnresponsive()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT5);}
-   if(motorTempHigh()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT6);}
-   if(CANFailure()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT7);}
-   if(currentExceeds()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_0_15);}
-   if(GForceCrash()){NVIC_TRIGGER_IRQ(IRQ_GPIO2_16_31);}
-   if(APPSImplausibility()) {
-      car.sendDashError(97);
-      car.DTI.setRCurrent(0);
+   // if(APPSBSPDViolation()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT3);}
+   // if(hardBrake()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT4);}
+   // if(accelUnresponsive()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT5);}
+   // if(motorTempHigh()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT6);}
+   // if(CANFailure()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT7);}
+   // if(currentExceeds()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_0_15);}
+   // if(GForceCrash()){NVIC_TRIGGER_IRQ(IRQ_GPIO2_16_31);}
+   // if(APPSImplausibility()) {
+   //    car.sendDashError(97);
+   //    car.DTI.setRCurrent(0);
 
-   }
-   if(BSEImplausibility()) {
-      car.sendDashError(98);
-      car.DTI.setRCurrent(0);
-   }
+   // }
+   // if(BSEImplausibility()) {
+   //    car.sendDashError(98);
+   //    car.DTI.setRCurrent(0);
+   // }
 
-   TS_WARN_Check(car);
+   // TS_WARN_Check(car);
    // Serial.println("WHAT THE FUCK");
    if(digitalRead(on_off_pin) == HIGH){
       s.drive_enable = 1;
@@ -144,7 +144,7 @@ void loop() {
    }
    if(digitalRead(full_pwr_pin)== HIGH){
       s.full_pwr = 1;
-      if(s.drive_enable && s.drive_engage){
+      if(state == DRIVE){
          led.setPixelColor(1, led.Color(0, 255, 0));
          led.setPixelColor(2, led.Color(0, 255, 0));
          led.show();
@@ -152,7 +152,7 @@ void loop() {
       
    }else{
       s.full_pwr = 0;
-      if(s.drive_enable && s.drive_engage){
+      if(state == DRIVE){
          led.setPixelColor(1, led.Color(0, 255, 255));
          led.setPixelColor(2, led.Color(0, 255, 255));
          led.show();
@@ -161,14 +161,14 @@ void loop() {
    }
    if(digitalRead(tc_pin)== HIGH){
       s.traction_control = 1;
-      if(s.drive_enable && s.drive_engage){
+      if(state == DRIVE){
          led.setPixelColor(3, led.Color(255, 120, 0));
          led.show();
       }
       
    }else{
       s.traction_control = 0;
-      if(s.drive_enable && s.drive_engage){
+      if(state == DRIVE){
          led.setPixelColor(3, led.Color(0, 0, 255));
          led.show();
       }
