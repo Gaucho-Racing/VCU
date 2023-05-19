@@ -8,7 +8,7 @@ States off(FakeCar &car, Switchboard& s) {
     led.clear();
     led.show();
     
-    if(s.drive_enable) {
+    if(s.drive_enable && !s.drive_engage) {
         for(int i = 0; i < 4; i++) {
             led.setPixelColor(i, led.Color(148, 0, 247));
             led.show();

@@ -6,7 +6,7 @@ States testing(FakeCar &car, States state){
         Serial.println("\n----------state----------");
         Serial.println(getTextForEnum(state).c_str());
         Serial.println("-------------------------");
-        printVals(car);
+        // printVals(car);
         time69 = millis();
     }
     // car.readData();

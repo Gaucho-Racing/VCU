@@ -5,6 +5,6 @@
 #ifndef ERROR_H
 #define ERROR_H
 
-States error(FakeCar &car, States prevStates, volatile bool (*erCheck)(void));
+States error(FakeCar &car, States prevStates, volatile bool (*erCheck)(void), Switchboard& s);
 
 #endif

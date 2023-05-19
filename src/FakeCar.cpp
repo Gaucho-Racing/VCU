@@ -118,7 +118,7 @@ void FakeCar::sendDashError(byte error){
     int error_1 = int(error);
     String s = "DASHBOARD ERROR CODE ";
     s.append(error_1);
-    Serial.println(s);
+    // Serial.println(s);
 }
 
 
