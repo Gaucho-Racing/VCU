@@ -74,7 +74,25 @@ volatile bool GForceCrash() {
                            car.sensors.getLinAccelZ()*car.sensors.getLinAccelZ()) > VALUE_G_FORCE_LIMIT;
 }
 
-volatile bool APPS
+volatile bool APPSImplausibility() {
+   if (abs(car.pedals.getAPPS1() - car.pedals.getAPPS2()) >= 10) {
+      apps_implausibility_time += car.pedals.getAge();
+      return (apps_implausibility_time >= 100);
+   } else {
+      apps_implausibility_time = 0;
+      return false;
+   }
+}
+
+volatile bool BSEImplausibility() {
+   if (car.pedals.getBrakeLimit()) {
+      bse_implausibility_time += car.pedals.getAge();
+      return (bse_implausibility_time >= 100);
+   } else {
+      bse_implausibility_time = 0;
+      return false;
+   }
+}
 
 // AND ONE MORE JUST TO CHECK WHETHER OR NOT THERE'S STILL CRITS. AT STARTUP -rt.z
 volatile bool hasStartupCrits() {
@@ -114,26 +132,16 @@ void loop() {
    if(systemError()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_16_31);}
    if(IMDFault()){NVIC_TRIGGER_IRQ(IRQ_GPIO2_0_15);}
    if(GForceCrash()){NVIC_TRIGGER_IRQ(IRQ_GPIO2_16_31);}
-   if (abs(car.pedals.getAPPS1() - car.pedals.getAPPS2()) >= 10) {
-      apps_implausibility_time += car.pedals.getAge();
-      if (apps_implausibility_time >= 100) {
-         car.DTI.setRCurrent(0);
-         return;
-      } else {
-         apps_implausibility_time = 0;
-      }
+   if(APPSImplausibility()) {
+      car.sendDashError(110);
+      state = sendToError(state, &APPSImplausibility);
    }
-   if (car.pedals.getBrakeLimit()) {
-      bse_implausibility_time += car.pedals.getAge();
-      if (bse_implausibility_time >= 100) {
-         car.DTI.setRCurrent(0);
-         return;
-      } else {
-         bse_implausibility_time = 0;
-      }
+   if(BSEImplausibility()) {
+      car.sendDashError(111);
+      state = sendToError(state, &BSEImplausibility);
    }
 
-  TS_WARN_Check(car);
+   TS_WARN_Check(car);
 
    switch (state) {
       case OFF:
