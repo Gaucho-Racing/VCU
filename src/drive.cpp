@@ -33,6 +33,6 @@ States drive(FakeCar& car, Switchboard& s) {
     
     // set motor output
     car.DTI.setRCurrent(motorOut((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2, car, s));
-    if (!onPressed(car)) return OFF;
+    if (!s.drive_enable) return OFF;
     return DRIVE;
 }
