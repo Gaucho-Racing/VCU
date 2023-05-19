@@ -31,6 +31,7 @@ const int VALUE_MOT_TEMP_MAX = 2000;
 const int VALUE_MOT_TEMP_MIN = 0;
 const float VALUE_NO_CURRENT = 0;
 const float VALUE_APPS_BSPD_THROTTLE = 25;
+const float VALUE_APPS_BSPD_RETURN = 5;
 const int VALUE_MIN_BRAKE_PRESSURE = 50;
 const float VALUE_MIN_CURRENT_THRESHOLD = 0;
 const int VALUE_HARD_BRAKE_LIMIT = 1700;

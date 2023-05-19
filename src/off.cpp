@@ -2,11 +2,9 @@
 #include "main.h"
 #include "onOffUtility.h"
 
-
-
-States off(FakeCar &car, Switchboard& s) {
-    // Serial.println("OFF");
-    
+// Starts at this state when the car is unlocked
+States off(I_no_can_speak_flex &car, Switchboard& s) {
+    car.DTI.setRCurrent(0);
     led.clear();
     led.show();
     
@@ -27,7 +25,5 @@ States off(FakeCar &car, Switchboard& s) {
         led.show();
         return ON;
     }
-
-    
     return OFF;
 }

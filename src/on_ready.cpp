@@ -6,15 +6,13 @@
 
 States on_ready(FakeCar &car, Switchboard& s) {
     //motorOutput = 0;
-    // car.DTI.setRCurrent(0);
+    car.DTI.setRCurrent(0);
     // if drive mode engaged
-    if(!s.drive_enable) return OFF;
-    if(s.drive_enable && !s.drive_engage) return ON;
-    if(s.drive_engage && s.drive_enable && car.pedals.getAPPS1() > 0) {
+    if((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 > 0.05)  {
         led.clear();
         led.show();
         return DRIVE;
-    }
-    
+    if(!s.drive_enable) return OFF;
+    if(s.drive_enable && !s.drive_engage) return ON;
     return ON_READY;
 }

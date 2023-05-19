@@ -1,4 +1,5 @@
 #include "main.h";
+#include "onOffUtility.h";
 
 float motorOut(float throttle, FakeCar& car, Switchboard& s) {
   // i'm assuming throttle is a value between 0 and 100
@@ -26,15 +27,12 @@ float motorOut(float throttle, FakeCar& car, Switchboard& s) {
 
 
 States drive(FakeCar& car, Switchboard& s) {
-    
     // if throttle not applied
-    if((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 <= 0.05) {
+    if((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 <= 0.05) 
       return ON_READY;
-    }
     
     // set motor output
-    car.DTI.setRCurrent(motorOut((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2, car, s));   
-  
+    car.DTI.setRCurrent(motorOut((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2, car, s));
+    if (!onPressed(car)) return OFF;
     return DRIVE;
-    
 }

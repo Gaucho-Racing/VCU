@@ -12,7 +12,10 @@
 
 volatile States state;
 volatile States prevState; 
+volatile bool (*errorCheck)(void); 
 
+//I_no_can_speak_flex car(true);
+int apps_implausibility_time = 0, bse_implausibility_time = 0;
 
 volatile bool (*errorCheck)(void); 
 Switchboard s;
@@ -33,6 +36,11 @@ volatile bool APPSBSPDViolation() {
    return (car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 > VALUE_APPS_BSPD_THROTTLE && 
       (car.pedals.getBrakePressure1() > VALUE_MIN_BRAKE_PRESSURE || car.pedals.getBrakePressure2() > VALUE_MIN_BRAKE_PRESSURE);
 }
+
+volatile bool CanReturnFromAPPSBSPD() {
+   return (car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 < VALUE_APPS_BSPD_RETURN;
+}
+
 volatile bool hardBrake() {
    return car.pedals.getBrakePressure1() > VALUE_HARD_BRAKE_LIMIT || 
       car.pedals.getBrakePressure2() > VALUE_HARD_BRAKE_LIMIT;
@@ -56,6 +64,28 @@ volatile bool GForceCrash() {
                            car.sensors.getLinAccelY()*car.sensors.getLinAccelY() +
                            car.sensors.getLinAccelZ()*car.sensors.getLinAccelZ()) > VALUE_G_FORCE_LIMIT;
 }
+
+volatile bool APPSImplausibility() {
+   if (abs(car.pedals.getAPPS1() - car.pedals.getAPPS2()) >= 10) {
+      apps_implausibility_time += car.pedals.getAge();
+      return (apps_implausibility_time >= 100);
+   } else {
+      apps_implausibility_time = 0;
+      return false;
+   }
+}
+
+volatile bool BSEImplausibility() {
+   if (car.pedals.getBrakeLimit()) {
+      bse_implausibility_time += car.pedals.getAge();
+      return (bse_implausibility_time >= 100);
+   } else {
+      bse_implausibility_time = 0;
+      return false;
+   }
+}
+
+// AND ONE MORE JUST TO CHECK WHETHER OR NOT THERE'S STILL CRITS. AT STARTUP -rt.z
 volatile bool hasStartupCrits() {
    // return criticalCheck(car, false); 
    return false; //STUB TODO FIX
@@ -69,12 +99,43 @@ States sendToError(volatile States currentState, volatile bool (*erFunc)(void)) 
    return ERROR;
 }
 
+void criticalBeeps() {
+   car.DTI.setCurrent(0);
+   digitalWrite(3, HIGH);
+   delay(1000);
+   digitalWrite(3, LOW);
+
+}
+
 /*
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                           MAIN LOOP
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
 void loop() {
+  car.readData();
+   if(batteryTempHigh()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT0);}
+   if(noCurrent()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT2);}
+   if(APPSBSPDViolation()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT3);}
+   if(hardBrake()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT4);}
+   if(accelUnresponsive()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT5);}
+   if(motorTempHigh()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT6);}
+   if(CANFailure()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT7);}
+   if(currentExceeds()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_0_15);}
+   if(systemError()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_16_31);}
+   if(IMDFault()){NVIC_TRIGGER_IRQ(IRQ_GPIO2_0_15);}
+   if(GForceCrash()){NVIC_TRIGGER_IRQ(IRQ_GPIO2_16_31);}
+   if(APPSImplausibility()) {
+      car.sendDashError(97);
+      car.DTI.setRCurrent(0);
+
+   }
+   if(BSEImplausibility()) {
+      car.sendDashError(98);
+      car.DTI.setRCurrent(0);
+   }
+
+   TS_WARN_Check(car);
    // Serial.println("WHAT THE FUCK");
    if(digitalRead(on_off_pin) == HIGH){
       s.drive_enable = 1;
@@ -118,22 +179,6 @@ void loop() {
       }
       
    }
-
-  
-   
-   
-
-
-//   if(APPSBSPDViolation()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT3);}
-//   if(hardBrake()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT4);}
-//   if(accelUnresponsive()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT5);}
-//   if(motorTempHigh()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT6);}
-//   if(CANFailure()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT7);}
-//   if(currentExceeds()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_0_15);}
-//   if(GForceCrash()){NVIC_TRIGGER_IRQ(IRQ_GPIO2_16_31);}
-
-
-//   TS_WARN_Check(car);
 
    //NOTE:
 
@@ -179,15 +224,18 @@ void loop() {
 
 // Interrupt handler for accelerator and brakes
 void APPSBSPDCheck_ISR() {
-      car.DTI.setCurrent(0);
+   car.sendDashError(99);
+   if (!CanReturnFromAPPSBSPD() && driveEngaged(car)){
+      car.DTI.setRCurrent(0);
       // Send message to Dash
-      car.sendDashError(99); // this will keep sending as long as APPSBSPDViolation() is true. 
+   }
 }
 // Interrupt handler for hard brake
 void HardBrake_ISR() {
    // Can someone confirm the rule for this. 
    // There's no rule for this. It's just a safety feature we decided on in case the car's out of control.
-   car.DTI.setCurrent(0);
+   car.DTI.setRCurrent(0);
+   state = sendToError(state, &hardBrake);
 }
 // Interrupt handler for unresponsive throttle
 void UnresponsiveThrottle_ISR() {
@@ -234,6 +282,9 @@ void setup() {
    pinMode(engage_pin, INPUT_PULLUP);
    pinMode(full_pwr_pin, INPUT_PULLUP);
    pinMode(tc_pin, INPUT_PULLUP);
+
+   //set beeper pin to output mode
+   pinMode(3, OUTPUT);
 
   //-------SET STATE------------
 
