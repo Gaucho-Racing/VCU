@@ -1,6 +1,6 @@
 #include "main.h";
 
-float motorOut(float throttle, FakeCar& car) {
+float motorOut(float throttle, FakeCar& car, Switchboard& s) {
   // i'm assuming throttle is a value between 0 and 100
   // can adjust accordingly later
   
@@ -11,10 +11,10 @@ float motorOut(float throttle, FakeCar& car) {
 
   // wheels slipping: traction control
   // multiplied by 10 is because of some CAN scaling shit
-
-  if ( rear > front) {
+  if ( s.traction_control && rear  > front*1.25) {
     // adjust 0.1 factor in testing
     // also add threshold for it to turn on
+    
     return 10 * (throttle - 0.1 * (rear - front));
   }
 
@@ -33,7 +33,7 @@ States drive(FakeCar& car, Switchboard& s) {
     }
     
     // set motor output
-    car.DTI.setRCurrent(motorOut((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2, car));   
+    car.DTI.setRCurrent(motorOut((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2, car, s));   
   
     return DRIVE;
     
