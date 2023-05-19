@@ -12,28 +12,30 @@ bool onPressed(I_no_can_speak_flex &car) {
     return (car.DTI.getDCCurrent() > 0);
 }
 
-bool isRejectingStartup(I_no_can_speak_flex &car) {
+bool isRejectingStartup(I_no_can_speak_flex &car, bool send_dash_errors = true) {
     //152: Drive disabled
     if (car.DTI.getDriveEnable() != 1) {
-        car.sendDashError(152);
+        if (send_dash_errors) car.sendDashError(152);
         return true;
     }
 
+/*
     //151: Wait... the thing isn't actually on
     if (car.DTI.getDCCurrent() <= 0) {
         car.sendDashError(151);
         return true;
     }
+*/
 
     //191: Accelerator engaged
     if ((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 > 0) {
-        car.sendDashError(191);
+        if (send_dash_errors) car.sendDashError(191);
         return true;
     }
     
     //192: Brakes not engaged upon startup
     if (car.pedals.getBrakePressure1() < 50 || car.pedals.getBrakePressure2() < 50) {
-        car.sendDashError(192);
+        if (send_dash_errors) car.sendDashError(192);
         return true;
     }
 

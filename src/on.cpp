@@ -2,6 +2,7 @@
 // @rt.z
 
 #include "main.h"
+#include "stubs.h"
 #include "onOffUtility.h"
 
 //Run all code for initialization; 
@@ -10,11 +11,24 @@
 //check for all conditions to allow for ON_READY
 States on(I_no_can_speak_flex &car) {
    car.DTI.setRCurrent(0);
-   if (criticalCheck(car)) return ERROR;
-   warningCheck(car);
+   bool rejectStartup = false;
+   if (isRejectingStartup(car, false)) rejectStartup = true;
+   if (driveEngaged(car) && !rejectStartup) {   
+      if (criticalCheck(car)) return ERROR;
+      warningCheck(car);  
+      unsigned long time70 = 0;
+      while (millis() - time70 > 1500) {
+         digitalWrite(3, HIGH);
+         on_ready(car);
+      }
+      digitalWrite(3, LOW);
+      return ON_READY;
+   } else if (driveEngaged(car) && rejectStartup) {
+      isRejectingStartup(car);
+   }
+   if (!driveEngaged(car) && !isRejectingStartup(car, false)) rejectStartup = false;
 
-   //beeper: 5V, 0.5 amps to some pin for 1 second.
-   return ON_READY;
+   return ON;
 
    /*
    if(!systemsCheck(car)) { //if it returns zero, we move to ON_READY
