@@ -7,12 +7,7 @@
 #include <vector>
 #include <cmath>
 
-//returns true if there is current running to the motor
-bool onPressed(I_no_can_speak_flex &car) {  
-    return (car.DTI.getDCCurrent() > 0);
-}
-
-bool isRejectingStartup(I_no_can_speak_flex &car, bool send_dash_errors = true) {
+bool isRejectingStartup(FakeCar &car, bool send_dash_errors = true) {
     //152: Drive disabled
     if (car.DTI.getDriveEnable() != 1) {
         if (send_dash_errors) car.sendDashError(152);
@@ -42,7 +37,7 @@ bool isRejectingStartup(I_no_can_speak_flex &car, bool send_dash_errors = true) 
     return false;
 }
 
-bool criticalCheck(I_no_can_speak_flex &car, bool send_dash_errors = true) {
+bool criticalCheck(FakeCar &car, bool send_dash_errors = true) {
     std::vector<int> crit_codes;
 
     //CAN FAULT (100):
@@ -131,7 +126,7 @@ bool criticalCheck(I_no_can_speak_flex &car, bool send_dash_errors = true) {
     return (crit_codes.empty());
 }
 
-bool warningCheck(I_no_can_speak_flex &car, bool send_dash_warnings = true) {
+bool warningCheck(FakeCar &car, bool send_dash_warnings = true) {
     std::vector<int> warn_codes;
 
 
@@ -215,6 +210,3 @@ bool warningCheck(I_no_can_speak_flex &car, bool send_dash_warnings = true) {
     return (warn_codes.empty());
 }
 
-bool driveEngaged(I_no_can_speak_flex &car) {
-    return digitalRead(4);
-}

@@ -10,20 +10,13 @@
 
 #include "main.h"
 
-States off(I_no_can_speak_flex &car);
+States off(FakeCar &car, Switchboard& s);
 
-States on(I_no_can_speak_flex &car);
+States on(FakeCar &car,  Switchboard& s);
 
-States on_ready(I_no_can_speak_flex &car);
+States on_ready(FakeCar &car,  Switchboard& s);
 
-States drive(I_no_can_speak_flex &car);
+States drive(FakeCar &car,  Switchboard& s);
 
-/*
-States charge_precharge(I_no_can_speak_flex &car);
-
-States charge_charging(I_no_can_speak_flex &car);
-
-States charge_full(I_no_can_speak_flex &car);
-*/
 
 #endif

@@ -9,27 +9,55 @@
 //One deliberate Systems check, 
 //Read info from can and send to dashboard, 
 //check for all conditions to allow for ON_READY
-States on(I_no_can_speak_flex &car) {
+States on(I_no_can_speak_flex &car, Switchboard& s) {
    car.DTI.setRCurrent(0);
+   
+   led.setPixelColor(0, led.Color(0, 255, 179));
+   led.setPixelColor(1, led.Color(0, 255, 179));
+   led.setPixelColor(2, led.Color(0, 255, 179));
+   led.setPixelColor(3, led.Color(0, 255, 179));
+   led.show();
+
    bool rejectStartup = false;
    if (isRejectingStartup(car, false)) rejectStartup = true;
-   if (driveEngaged(car) && !rejectStartup) {   
+   if (driveEngaged(car) && !rejectStartup) {
+     for(int i=0; i<4; i++) {
+         led.setPixelColor(i, led.Color(0, 0, 255));
+         led.show();
+         delay(100);
+      }
+      led.clear();
+      led.show();
       if (criticalCheck(car)) return ERROR;
       warningCheck(car);  
-      unsigned long time70 = 0;
-      while (millis() - time70 > 1500) {
+      for(int i = 0; i< 4; i++){
          digitalWrite(3, HIGH);
-         on_ready(car);
+         led.clear();
+         led.setPixelColor(0, led.Color(0, 255, 13));
+         led.setPixelColor(1, led.Color(0, 255, 13));
+         led.setPixelColor(2, led.Color(0, 255, 13));
+         led.setPixelColor(3, led.Color(0, 255, 13));
+         led.show();
+         delay(150);
+         led.setPixelColor(0, led.Color(0, 0, 0));
+         led.setPixelColor(1, led.Color(0, 0, 0));
+         led.setPixelColor(2, led.Color(0, 0, 0));
+         led.setPixelColor(3, led.Color(0, 0, 0));
+         led.show();
+         delay(150);
+         if(!s.drive_enable) return OFF;
       }
+      led.clear();
+      led.show();
       digitalWrite(3, LOW);
       return ON_READY;
    } else if (driveEngaged(car) && rejectStartup) {
       isRejectingStartup(car);
    }
    if (!driveEngaged(car) && !isRejectingStartup(car, false)) rejectStartup = false;
-   if (!onPressed(car)) return OFF;
+   if(!s.drive_enable) return OFF;
    return ON;
-
+   
    /*
    if(!systemsCheck(car)) { //if it returns zero, we move to ON_READY
       return ON_READY;

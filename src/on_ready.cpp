@@ -4,13 +4,15 @@
 #include "main.h"
 #include "onOffUtility.h"
 
-States on_ready(I_no_can_speak_flex &car) {
+States on_ready(FakeCar &car, Switchboard& s) {
     //motorOutput = 0;
-    // if drive mode engaged
     car.DTI.setRCurrent(0);
-    if((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 > 0.05) 
-      return DRIVE;
-    if (!driveEngaged(car)) return ON;
-    if (!onPressed(car)) return OFF;
+    // if drive mode engaged
+    if((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 > 0.05)  {
+        led.clear();
+        led.show();
+        return DRIVE;
+    if(!s.drive_enable) return OFF;
+    if(s.drive_enable && !s.drive_engage) return ON;
     return ON_READY;
 }
