@@ -133,12 +133,13 @@ void loop() {
    if(IMDFault()){NVIC_TRIGGER_IRQ(IRQ_GPIO2_0_15);}
    if(GForceCrash()){NVIC_TRIGGER_IRQ(IRQ_GPIO2_16_31);}
    if(APPSImplausibility()) {
-      car.sendDashError(110);
-      state = sendToError(state, &APPSImplausibility);
+      car.sendDashError(97);
+      car.DTI.setRCurrent(0);
+
    }
    if(BSEImplausibility()) {
-      car.sendDashError(111);
-      state = sendToError(state, &BSEImplausibility);
+      car.sendDashError(98);
+      car.DTI.setRCurrent(0);
    }
 
    TS_WARN_Check(car);
@@ -213,7 +214,7 @@ void NoCurrent_ISR() {
 void APPSBSPDCheck_ISR() {
    car.sendDashError(99);
    while(!CanReturnFromAPPSBSPD() && driveEngaged(car)){
-      car.DTI.setCurrent(0);
+      car.DTI.setRCurrent(0);
       // Send message to Dash
    }
 }
@@ -222,7 +223,7 @@ void APPSBSPDCheck_ISR() {
 void HardBrake_ISR() {
    // Can someone confirm the rule for this. 
    // There's no rule for this. It's just a safety feature we decided on in case the car's out of control.
-   car.DTI.setCurrent(0);
+   car.DTI.setRCurrent(0);
    state = sendToError(state, &hardBrake);
 }
 
