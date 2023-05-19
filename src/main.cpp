@@ -74,6 +74,8 @@ volatile bool GForceCrash() {
                            car.sensors.getLinAccelZ()*car.sensors.getLinAccelZ()) > VALUE_G_FORCE_LIMIT;
 }
 
+volatile bool APPS
+
 // AND ONE MORE JUST TO CHECK WHETHER OR NOT THERE'S STILL CRITS. AT STARTUP -rt.z
 volatile bool hasStartupCrits() {
    return criticalCheck(car, false);

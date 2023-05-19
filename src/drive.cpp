@@ -28,18 +28,12 @@ float motorOut(float throttle, I_no_can_speak_flex& car) {
 States drive(I_no_can_speak_flex& car) {
     
     // if throttle not applied
-    /*
-    if((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 <= 0.05) {
+    if((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 <= 0.05) 
       return ON_READY;
-    }
-    */
     
     // set motor output
     car.DTI.setRCurrent(motorOut((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2, car));
-
-    if (!driveEngaged(car)) {
-      return ON_READY;
-    }   
+    if (!onPressed(car)) return OFF;
     return DRIVE;
     
 }

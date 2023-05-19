@@ -27,7 +27,7 @@ States on(I_no_can_speak_flex &car) {
       isRejectingStartup(car);
    }
    if (!driveEngaged(car) && !isRejectingStartup(car, false)) rejectStartup = false;
-
+   if (!onPressed(car)) return OFF;
    return ON;
 
    /*
