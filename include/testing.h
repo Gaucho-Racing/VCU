@@ -4,7 +4,7 @@
 #include "main.h"
 #include <string>
 
-States testing(FakeCar &car, States state);
+States testing(I_no_can_speak_flex &car, States state);
 
-void printVals(FakeCar &car);
+void printVals(I_no_can_speak_flex &car);
 #endif

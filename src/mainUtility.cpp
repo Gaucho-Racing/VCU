@@ -5,7 +5,7 @@
 #include "mainUtility.h"
 #include "constants.h"
 
-void TS_WARN_Check(FakeCar &car) {
+void TS_WARN_Check(I_no_can_speak_flex &car) {
    // TIRE PRESSURES AND TEMPERATURES
 
    //51: Front-right tire temperature too high

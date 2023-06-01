@@ -6,7 +6,7 @@
 #include "constants.h"
 //#include <iostream>
 
-States error(FakeCar &car, States prevStates, volatile bool (*erCheck)(void), Switchboard& s) {
+States error(I_no_can_speak_flex &car, States prevStates, volatile bool (*erCheck)(void), Switchboard& s) {
 
     car.DTI.setDriveEnable(0);
     car.DTI.setRCurrent(0);

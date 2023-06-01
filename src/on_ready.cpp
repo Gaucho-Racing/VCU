@@ -4,7 +4,7 @@
 #include "main.h"
 #include "onOffUtility.h"
 
-States on_ready(FakeCar &car, Switchboard& s) {
+States on_ready(I_no_can_speak_flex &car, Switchboard& s) {
     //motorOutput = 0;
     car.DTI.setRCurrent(0);
     // if drive mode engaged

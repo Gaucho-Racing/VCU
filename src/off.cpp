@@ -3,7 +3,7 @@
 #include "onOffUtility.h"
 
 // Starts at this state when the car is unlocked
-States off(FakeCar &car, Switchboard& s) {
+States off(I_no_can_speak_flex &car, Switchboard& s) {
     car.DTI.setRCurrent(0);
     led.clear();
     led.show();

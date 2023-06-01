@@ -3,7 +3,7 @@
 
 #include "main.h"
 
-class testbench: public FakeCar{
+class testbench: public I_no_can_speak_flex{
     
 
 };

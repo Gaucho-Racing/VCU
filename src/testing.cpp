@@ -1,12 +1,12 @@
 #include "testing.h"
 #include <Arduino.h>
 unsigned long time69=0;
-States testing(FakeCar &car, States state){
+States testing(I_no_can_speak_flex &car, States state){
     if(millis()-time69>1000){
         Serial.println("\n----------state----------");
         Serial.println(getTextForEnum(state).c_str());
         Serial.println("-------------------------");
-        // printVals(car);
+        printVals(car);
         time69 = millis();
     }
     // car.readData();
@@ -16,7 +16,7 @@ States testing(FakeCar &car, States state){
 }
 
 
-void printVals(FakeCar &car){
+void printVals(I_no_can_speak_flex &car){
     
     //print out Inverter
     Serial.print("Inverters, ERPM: ");

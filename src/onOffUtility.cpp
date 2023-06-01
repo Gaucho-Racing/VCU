@@ -7,7 +7,7 @@
 #include <vector>
 #include <cmath>
 
-bool isRejectingStartup(FakeCar &car, bool send_dash_errors = true) {
+bool isRejectingStartup(I_no_can_speak_flex &car, bool send_dash_errors = true) {
     //152: Drive disabled
     if (car.DTI.getDriveEnable() != 1) {
         if (send_dash_errors) car.sendDashError(152);
@@ -37,7 +37,7 @@ bool isRejectingStartup(FakeCar &car, bool send_dash_errors = true) {
     return false;
 }
 
-bool criticalCheck(FakeCar &car, bool send_dash_errors = true) {
+bool criticalCheck(I_no_can_speak_flex &car, bool send_dash_errors = true) {
     std::vector<int> crit_codes;
 
     //CAN FAULT (100):
@@ -126,7 +126,7 @@ bool criticalCheck(FakeCar &car, bool send_dash_errors = true) {
     return (crit_codes.empty());
 }
 
-bool warningCheck(FakeCar &car, bool send_dash_warnings = true) {
+bool warningCheck(I_no_can_speak_flex &car, bool send_dash_warnings = true) {
     std::vector<int> warn_codes;
 
 

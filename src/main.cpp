@@ -18,7 +18,7 @@ volatile bool (*errorCheck)(void);
 int apps_implausibility_time = 0, bse_implausibility_time = 0;
 
 Switchboard s;
-FakeCar car(true); 
+I_no_can_speak_flex car(true); 
 const int on_off_pin = 12;
 const int engage_pin = 11;
 const int full_pwr_pin = 10;
@@ -112,7 +112,7 @@ void criticalBeeps() {
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
 void loop() {
-  car.readData();
+//   car.readData();
    if(state!=OFF){
       if(hardBrake()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT4);}
       if(accelUnresponsive()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT5);}
