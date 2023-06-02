@@ -86,8 +86,8 @@ volatile bool BSEImplausibility() {
 
 // AND ONE MORE JUST TO CHECK WHETHER OR NOT THERE'S STILL CRITS. AT STARTUP -rt.z
 volatile bool hasStartupCrits() {
-   // return criticalCheck(car, false); 
-   return false; //STUB TODO FIX
+   return criticalCheck(car, false); 
+   //return false; //STUB TODO FIX
 }
 
 /* use this for interrupts to store currentState; handles the specified error */
@@ -98,14 +98,6 @@ States sendToError(volatile States currentState, volatile bool (*erFunc)(void)) 
    return ERROR;
 }
 
-void criticalBeeps() {
-   car.DTI.setCurrent(0);
-   digitalWrite(3, HIGH);
-   delay(1000);
-   digitalWrite(3, LOW);
-
-}
-
 /*
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                           MAIN LOOP
@@ -114,22 +106,22 @@ void criticalBeeps() {
 void loop() {
 //   car.readData();
    if(state!=OFF){
-      if(hardBrake()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT4);}
-      if(accelUnresponsive()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT5);}
+      if(hardBrake() && (state == DRIVE || state == ON_READY)){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT4);}
+      if(accelUnresponsive() && (state == DRIVE || state == ON_READY)){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT5);}
       if(motorTempHigh()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT6);}
       if(CANFailure()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT7);}
       if(currentExceeds()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_0_15);}
       if(GForceCrash()){NVIC_TRIGGER_IRQ(IRQ_GPIO2_16_31);}
-      if(APPSImplausibility()) {
+      if(APPSImplausibility() && (state == DRIVE || state == ON_READY) ) {
          car.sendDashError(97);
          car.DTI.setRCurrent(0);
 
       }
-      if(BSEImplausibility()) {
+      if(BSEImplausibility() && (state == DRIVE || state == ON_READY)) {
          car.sendDashError(98);
          car.DTI.setRCurrent(0);
       }
-      if(APPSBSPDViolation()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT3);}
+      if(APPSBSPDViolation() && (state == DRIVE || state == ON_READY)){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT3);}
 
    }
  
