@@ -29,7 +29,7 @@ States on(I_no_can_speak_flex &car, Switchboard& s) {
       led.clear();
       led.show();
       if (criticalCheck(car)) return ERROR;
-      warningCheck(car);  
+      warningCheck(car, true);  
       for(int i = 0; i< 4; i++) {
          digitalWrite(3, HIGH);
          led.clear();
