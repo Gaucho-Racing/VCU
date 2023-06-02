@@ -43,7 +43,6 @@ bool criticalCheck(I_no_can_speak_flex &car, bool send_dash_errors = true) {
     //CAN FAULT (100):
     //100: Unable to revieve CAN packets
     if ((car.DTI.getAge()) > MAX_CAN_DURATION) crit_codes.push_back(100);
-    if ((car.IMD.getAge()) > MAX_CAN_DURATION) crit_codes.push_back(100);
     if ((car.sensors.getAge()) > MAX_CAN_DURATION) crit_codes.push_back(100);
     if ((car.pedals.getAge()) > MAX_CAN_DURATION) crit_codes.push_back(100);
     if ((car.charger.getAge()) > MAX_CAN_DURATION) crit_codes.push_back(100);
@@ -103,22 +102,22 @@ bool criticalCheck(I_no_can_speak_flex &car, bool send_dash_errors = true) {
 
     //IMD STARTUP ERRORS (180 - 189):
     //141: Isolation fault. See can documentation.
-    if ((i = car.IMD.getIsolationStates()) == 11) crit_codes.push_back(181);
+    // if ((i = car.IMD.getIsolationStates()) == 11) crit_codes.push_back(181);
 
     //142: Isolation state unknown. See can documentation.
-    if ((i = car.IMD.getIsolationStates()) == 1) crit_codes.push_back(182);
+    // if ((i = car.IMD.getIsolationStates()) == 1) crit_codes.push_back(182);
 
     //143: Isolation Hardware error.
-    if (car.IMD.getHardware_Error() != 0) crit_codes.push_back(183);
+    // if (car.IMD.getHardware_Error() != 0) crit_codes.push_back(183);
 
     //144: Electrostatic potential energy exceeds 0.2J
-    if (car.IMD.getTouch_energy_fault() != 0) crit_codes.push_back(184);
+    // if (car.IMD.getTouch_energy_fault() != 0) crit_codes.push_back(184);
 
     //145: Exitation pulse not opertional
-    if (car.IMD.getExc_off() != 0) crit_codes.push_back(185);
+    // if (car.IMD.getExc_off() != 0) crit_codes.push_back(185);
 
     //147: IMD: Low battery Voltage / Battery Disconnect
-    if (car.IMD.getLow_Battery_Voltage() != 0) crit_codes.push_back(187);
+    // if (car.IMD.getLow_Battery_Voltage() != 0) crit_codes.push_back(187);
 
 
 
@@ -166,14 +165,14 @@ bool warningCheck(I_no_can_speak_flex &car, bool send_dash_warnings = true) {
 
     //IMD STARTUP WARNINGS (30 - 39)
     //40: IMD High Uncertatinty
-    if (car.IMD.getHigh_Uncertainty() != 1) warn_codes.push_back(30);
+    // if (car.IMD.getHigh_Uncertainty() != 1) warn_codes.push_back(30);
     
     int i;
     //41: Isolation warning. See can documentation.
-    if ((i = car.IMD.getIsolationStates()) == 10) warn_codes.push_back(31);
+    // if ((i = car.IMD.getIsolationStates()) == 10) warn_codes.push_back(31);
 
     //46: IMD: High battery Voltage / No max_battery_working_voltage set
-    if (car.IMD.getHigh_Battery_Voltage() != 0) warn_codes.push_back(36);
+    // if (car.IMD.getHigh_Battery_Voltage() != 0) warn_codes.push_back(36);
 
 
 

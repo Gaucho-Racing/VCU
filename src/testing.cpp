@@ -34,11 +34,11 @@ void printVals(I_no_can_speak_flex &car){
     Serial.println(car.BMS.getChargeState());
     //print out IMD
     Serial.print("IMD, Isolation State: ");
-    Serial.println(car.IMD.getIsolationStates());
+    // Serial.println(car.IMD.getIsolationStates());
     Serial.print("IMD, High Battery Voltage: ");
-    Serial.println(car.IMD.getHigh_Battery_Voltage());
+    // Serial.println(car.IMD.getHigh_Battery_Voltage());
     Serial.print("IMD, Low Battery Voltage: ");
-    Serial.println(car.IMD.getLow_Battery_Voltage());
+    // Serial.println(car.IMD.getLow_Battery_Voltage());
     //print out charger
     Serial.print("Charger, Current: ");
     Serial.println(car.charger.getCurrent());

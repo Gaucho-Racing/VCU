@@ -26,7 +26,6 @@ const int tc_pin = 9;
 
 /*
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-        
                   INTERRUPTS TRIGGER FUNCTIONS
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
@@ -51,7 +50,7 @@ volatile bool accelUnresponsive() {
 volatile bool motorTempHigh() { return car.DTI.getMotorTemp() > VALUE_MOT_TEMP_MAX; }
 volatile bool CANFailure() { 
    return (car.DTI.getAge() > MAX_CAN_DURATION || 
-      car.IMD.getAge() > MAX_CAN_DURATION || 
+      // car.IMD.getAge() > MAX_CAN_DURATION || 
       car.sensors.getAge() > MAX_CAN_DURATION || 
       car.pedals.getAge() > MAX_CAN_DURATION || 
       car.charger.getAge() > MAX_CAN_DURATION || 
@@ -111,6 +110,7 @@ void criticalBeeps() {
                           MAIN LOOP
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
+/*
 void loop() {
 //   car.readData();
    if(state!=OFF){
@@ -178,17 +178,6 @@ void loop() {
       
    }
 
-   //NOTE:
-
-   // TOGGLES ARE PINS 12, 11, 10, 9, 8
-   /*
-   12: ON OFF
-   11: START 
-   10: POWER MODe
-   9 : ?
-   8 : ?
-   */
-
    switch (state) {
       case OFF:
          state = off(car, s);
@@ -211,6 +200,23 @@ void loop() {
          break;
    }
    testing(car, state);
+}
+
+*/
+void loop(){
+   led.begin();
+   led.clear();
+   led.show();
+   car.readData();
+   //car.setDriveEnable(true);
+   Serial.println(car.DTI.getACCurrent());
+   if(digitalRead(on_off_pin) == HIGH){
+      car.setDriveEnable(true);
+      car.setRCurrent(5);
+   }else{
+      car.setDriveEnable(false);
+      car.setRCurrent(0);
+   }
 }
 
 /*
@@ -273,7 +279,7 @@ void CarCrashed_ISR() {
 void setup() {
 
    Serial.begin(9600);
-   // car.begin();
+   car.begin();
    led.begin();
 
    pinMode(on_off_pin, INPUT_PULLUP);
