@@ -18,6 +18,8 @@ States on(I_no_can_speak_flex &car, Switchboard& s) {
    led.setPixelColor(3, led.Color(0, 255, 179));
    led.show();
 
+   if(!s.drive_enable) return OFF;
+
    bool rejectStartup = false;
    if (isRejectingStartup(car, false)) rejectStartup = true;
    if (s.drive_engage && !rejectStartup) {
@@ -55,7 +57,6 @@ States on(I_no_can_speak_flex &car, Switchboard& s) {
       isRejectingStartup(car);
    }
    if (!s.drive_engage && !isRejectingStartup(car, false)) rejectStartup = false;
-   if(!s.drive_enable) return OFF;
    return ON;
    
    /*

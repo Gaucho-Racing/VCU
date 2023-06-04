@@ -32,20 +32,20 @@ const int tc_pin = 9;
 */
 
 volatile bool APPSBSPDViolation() {
-   return (car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 > VALUE_APPS_BSPD_THROTTLE && 
+   return s.drive_engage && (car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 > VALUE_APPS_BSPD_THROTTLE && 
       (car.pedals.getBrakePressure1() > VALUE_MIN_BRAKE_PRESSURE || car.pedals.getBrakePressure2() > VALUE_MIN_BRAKE_PRESSURE);
 }
 
 volatile bool CanReturnFromAPPSBSPD() {
-   return (car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 < VALUE_APPS_BSPD_RETURN;
+   return !s.drive_engage || (car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 < VALUE_APPS_BSPD_RETURN;
 }
 
 volatile bool hardBrake() {
-   return car.pedals.getBrakePressure1() > VALUE_HARD_BRAKE_LIMIT || 
+   return s.drive_engage && car.pedals.getBrakePressure1() > VALUE_HARD_BRAKE_LIMIT || 
       car.pedals.getBrakePressure2() > VALUE_HARD_BRAKE_LIMIT;
 }
 volatile bool accelUnresponsive() {
-   return (car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 > VALUE_APPS_UNRESPONSIVE_MAX && 
+   return s.drive_engage && (car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 > VALUE_APPS_UNRESPONSIVE_MAX && 
       car.DTI.getDCCurrent() <= VALUE_MIN_RESPONSIVE_CURRENT_MOTOR;
 } 
 volatile bool motorTempHigh() { return car.DTI.getMotorTemp() > VALUE_MOT_TEMP_MAX; }
@@ -57,7 +57,7 @@ volatile bool CANFailure() {
       car.charger.getAge() > MAX_CAN_DURATION || 
       car.BMS.getAge() > MAX_CAN_DURATION);
 }
-volatile bool currentExceeds() { return car.DTI.getDCCurrent()> VALUE_DTI_CURRENT_THRESHOLD; }
+volatile bool currentExceeds() { return car.DTI.getDCCurrent() > VALUE_DTI_CURRENT_THRESHOLD; }
 volatile bool GForceCrash() {
    return sqrt(car.sensors.getLinAccelX()*car.sensors.getLinAccelX() +
                            car.sensors.getLinAccelY()*car.sensors.getLinAccelY() +
@@ -67,7 +67,7 @@ volatile bool GForceCrash() {
 volatile bool APPSImplausibility() {
    if (abs(car.pedals.getAPPS1() - car.pedals.getAPPS2()) >= 10) {
       apps_implausibility_time += car.pedals.getAge();
-      return (apps_implausibility_time >= 100);
+      return s.drive_engage && (apps_implausibility_time >= 100);
    } else {
       apps_implausibility_time = 0;
       return false;
@@ -77,7 +77,7 @@ volatile bool APPSImplausibility() {
 volatile bool BSEImplausibility() {
    if (car.pedals.getBrakeLimit()) {
       bse_implausibility_time += car.pedals.getAge();
-      return (bse_implausibility_time >= 100);
+      return s.drive_engage && (bse_implausibility_time >= 100);
    } else {
       bse_implausibility_time = 0;
       return false;
@@ -105,26 +105,25 @@ States sendToError(volatile States currentState, volatile bool (*erFunc)(void)) 
 */
 void loop() {
 //   car.readData();
-   if(state!=OFF){
-      if(hardBrake() && (state == DRIVE || state == ON_READY)){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT4);}
-      if(accelUnresponsive() && (state == DRIVE || state == ON_READY)){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT5);}
+   if (state != OFF) {
+      if(hardBrake()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT4);}
+      if(accelUnresponsive()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT5);}
       if(motorTempHigh()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT6);}
       if(CANFailure()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT7);}
       if(currentExceeds()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_0_15);}
       if(GForceCrash()){NVIC_TRIGGER_IRQ(IRQ_GPIO2_16_31);}
-      if(APPSImplausibility() && (state == DRIVE || state == ON_READY) ) {
+      if(APPSImplausibility()) {
          car.sendDashError(97);
          car.DTI.setRCurrent(0);
 
       }
-      if(BSEImplausibility() && (state == DRIVE || state == ON_READY)) {
+      if(BSEImplausibility()) {
          car.sendDashError(98);
          car.DTI.setRCurrent(0);
       }
-      if(APPSBSPDViolation() && (state == DRIVE || state == ON_READY)){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT3);}
-
+      if(APPSBSPDViolation()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT3);}
    }
- 
+     
    TS_WARN_Check(car);
    // Serial.println("WHAT THE FUCK");
    if(digitalRead(on_off_pin) == HIGH){
@@ -132,11 +131,13 @@ void loop() {
    }else{
       s.drive_enable = 0;
    }
+
    if(digitalRead(engage_pin) == HIGH){
       s.drive_engage = 1;
    }else{
       s.drive_engage = 0;
    }
+
    if(digitalRead(full_pwr_pin)== HIGH){
       s.full_pwr = 1;
       if(state == DRIVE){
