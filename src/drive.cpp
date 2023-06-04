@@ -37,6 +37,7 @@ States drive(I_no_can_speak_flex& car, Switchboard& s) {
       return ON_READY;
     
     // set motor output
+    car.DTI.setDriveEnable(1);
     car.DTI.setRCurrent(motorOut((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2, car, s));
     return DRIVE;
 }

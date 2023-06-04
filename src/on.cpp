@@ -10,6 +10,7 @@
 //Read info from can and send to dashboard, 
 //check for all conditions to allow for ON_READY
 States on(I_no_can_speak_flex &car, Switchboard& s) {
+   car.DTI.setDriveEnable(0);
    car.DTI.setRCurrent(0);
    
    led.setPixelColor(0, led.Color(0, 255, 179));
