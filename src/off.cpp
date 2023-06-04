@@ -7,11 +7,16 @@
 
 // Starts at this state when the car is unlocked
 States off(I_no_can_speak_flex &car, Switchboard& s) {
+    car.DTI.setDriveEnable(0);
     car.DTI.setRCurrent(0);
+    
     led.clear();
     led.show();
     
-    if(s.drive_enable && !s.drive_engage) {
+    bool reject_on = false;
+    if (s.drive_engage) reject_on = true;
+
+    if(s.drive_enable && !s.drive_engage && !reject_on) {
         for(int i = 0; i < 4; i++) {
             led.setPixelColor(i, led.Color(148, 0, 247));
             led.show();
@@ -28,5 +33,8 @@ States off(I_no_can_speak_flex &car, Switchboard& s) {
         led.show();
         return ON;
     }
+
+    if (!s.drive_enable && !s.drive_engage) reject_on = false;
+
     return OFF;
 }
