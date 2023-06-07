@@ -8,12 +8,20 @@ States on_ready(I_no_can_speak_flex &car, Switchboard& s) {
     //motorOutput = 0;
     car.DTI.setDriveEnable(1);
     car.DTI.setRCurrent(0);
+    int brightness_fact = 50;
+    led.clear();
+    led.setPixelColor(0, led.Color(255/brightness_fact, 0, 0));
+    led.setPixelColor(1, led.Color(255/brightness_fact, 0, 0));
+    led.setPixelColor(2, led.Color(255/brightness_fact, 0, 0));
+    led.setPixelColor(3, led.Color(255/brightness_fact, 0, 0));
+    led.show();
 
     if(!s.drive_enable) return OFF;
     if(s.drive_enable && !s.drive_engage) return ON;
 
     // if drive mode engaged
-    if((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 > 0.05) {
+    // if((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 > 0.05) {
+    if(s.ROTARY_TEST_ACCEL > 0.1) {
         led.clear();
         led.show();
         return DRIVE;

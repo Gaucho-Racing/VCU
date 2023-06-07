@@ -12,22 +12,23 @@
 States on(I_no_can_speak_flex &car, Switchboard& s) {
    car.DTI.setDriveEnable(0);
    car.DTI.setRCurrent(0);
-   
-   led.setPixelColor(0, led.Color(0, 255, 179));
-   led.setPixelColor(1, led.Color(0, 255, 179));
-   led.setPixelColor(2, led.Color(0, 255, 179));
-   led.setPixelColor(3, led.Color(0, 255, 179));
+   int brightness_fact = 50;
+   led.clear();
+   led.setPixelColor(0, led.Color(0, 255/brightness_fact, 179/brightness_fact));
+   led.setPixelColor(1, led.Color(0, 255/brightness_fact, 179/brightness_fact));
+   led.setPixelColor(2, led.Color(0, 255/brightness_fact, 179/brightness_fact));
+   led.setPixelColor(3, led.Color(0, 255/brightness_fact, 179/brightness_fact));
    led.show();
 
    if(!s.drive_enable) return OFF;
 
    bool rejectStartup = false;
-   if (isRejectingStartup(car, false)) rejectStartup = true;
+   if (isRejectingStartup(car, s, false)) rejectStartup = true;
    if (s.drive_engage && !rejectStartup) {
      for(int i=0; i<4; i++) {
-         led.setPixelColor(i, led.Color(0, 0, 255));
+         led.setPixelColor(i, led.Color(255/brightness_fact, 255/brightness_fact, 255/brightness_fact));
          led.show();
-         delay(100);
+         delay(250);
       }
       led.clear();
       led.show();
@@ -36,16 +37,13 @@ States on(I_no_can_speak_flex &car, Switchboard& s) {
       for(int i = 0; i< 4; i++) {
          digitalWrite(3, HIGH);
          led.clear();
-         led.setPixelColor(0, led.Color(0, 255, 13));
-         led.setPixelColor(1, led.Color(0, 255, 13));
-         led.setPixelColor(2, led.Color(0, 255, 13));
-         led.setPixelColor(3, led.Color(0, 255, 13));
+         led.setPixelColor(0, led.Color(0, 255/brightness_fact, 13/brightness_fact));
+         led.setPixelColor(1, led.Color(0, 255/brightness_fact, 13/brightness_fact));
+         led.setPixelColor(2, led.Color(0, 255/brightness_fact, 13/brightness_fact));
+         led.setPixelColor(3, led.Color(0, 255/brightness_fact, 13/brightness_fact));
          led.show();
          delay(150);
-         led.setPixelColor(0, led.Color(0, 0, 0));
-         led.setPixelColor(1, led.Color(0, 0, 0));
-         led.setPixelColor(2, led.Color(0, 0, 0));
-         led.setPixelColor(3, led.Color(0, 0, 0));
+         led.clear();
          led.show();
          delay(150);
          if(!s.drive_enable) return OFF;
@@ -55,9 +53,9 @@ States on(I_no_can_speak_flex &car, Switchboard& s) {
       digitalWrite(3, LOW);
       return ON_READY;
    } else if (s.drive_engage && rejectStartup) {
-      isRejectingStartup(car);
+      isRejectingStartup(car, s);
    }
-   if (!s.drive_engage && !isRejectingStartup(car, false)) rejectStartup = false;
+   if (!s.drive_engage && !isRejectingStartup(car, s, false)) rejectStartup = false;
    return ON;
    
    /*

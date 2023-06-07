@@ -22,7 +22,7 @@ I_no_can_speak_flex car(true);
 const int on_off_pin = 12;
 const int engage_pin = 11;
 const int full_pwr_pin = 10;
-const int tc_pin = 9;
+const int brake_pin = 9;
 const int pedal_pin = 24;
 
 /*
@@ -103,7 +103,7 @@ States sendToError(volatile States currentState, volatile bool (*erFunc)(void)) 
                           MAIN LOOP
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
-/*
+
 void loop() {
 //   car.readData();
    if (state != OFF) {
@@ -140,36 +140,19 @@ void loop() {
 
    if(digitalRead(full_pwr_pin)== HIGH){
       s.full_pwr = 1;
-      if(state == DRIVE){
-         led.setPixelColor(1, led.Color(0, 255, 0));
-         led.setPixelColor(2, led.Color(0, 255, 0));
-         led.show();
-      }
-      
+
    }else{
       s.full_pwr = 0;
-      if(state == DRIVE){
-         led.setPixelColor(1, led.Color(0, 255, 255));
-         led.setPixelColor(2, led.Color(0, 255, 255));
-         led.show();
-      }
-      
    }
-   if(digitalRead(tc_pin)== HIGH){
-      s.traction_control = 1;
-      if(state == DRIVE){
-         led.setPixelColor(3, led.Color(255, 120, 0));
-         led.show();
-      }
-      
-   }else{
-      s.traction_control = 0;
-      if(state == DRIVE){
-         led.setPixelColor(3, led.Color(0, 0, 255));
-         led.show();
-      }
-      
+   if(digitalRead(brake_pin) == HIGH){
+      s.SWITCH_TEST_BRAKES = 1;
    }
+   else{
+      s.SWITCH_TEST_BRAKES = 0;
+   }
+   s.ROTARY_TEST_ACCEL = analogRead(pedal_pin)/1023.0;
+
+
 
    switch (state) {
       case OFF:
@@ -188,36 +171,34 @@ void loop() {
       case ERROR:
          state = error(car, prevState, errorCheck, s);
          break;
-      case TESTING:
-         state = testing(car, state);
-         break;
+      // case TESTING:
+      //    state = testing(car, state);
+      //    break;
    }
-   testing(car, state);
+   testing(car, s, state);
 }
 
-*/
 
-
-void loop(){
-   led.begin();
-   led.clear();
-   led.show();
-   car.readData();
-   //car.setDriveEnable(true);
-   double MAX_PEDAL_CURRENT = 50;
-   Serial.println(car.DTI.getERPM()/10.0);
-   if(digitalRead(on_off_pin) == HIGH){
-      car.DTI.setDriveEnable(true);
-      int level = analogRead(pedal_pin);
-      if(level < 25) car.DTI.setRCurrent(0);
-      else{
-         car.DTI.setRCurrent(MAX_PEDAL_CURRENT*level/1023.0);
-      }
-   }else{
-      car.DTI.setDriveEnable(false);
-      car.DTI.setRCurrent(0);
-   }
-}
+// void loop(){
+//    led.begin();
+//    led.clear();
+//    led.show();
+//    car.readData();
+//    //car.setDriveEnable(true);
+//    double MAX_PEDAL_CURRENT = 50;
+//    Serial.println(car.DTI.getERPM()/10.0);
+//    if(digitalRead(on_off_pin) == HIGH){
+//       car.DTI.setDriveEnable(true);
+//       int level = analogRead(pedal_pin);
+//       if(level < 25) car.DTI.setRCurrent(0);
+//       else{
+//          car.DTI.setRCurrent(MAX_PEDAL_CURRENT*level/1023.0);
+//       }
+//    }else{
+//       car.DTI.setDriveEnable(false);
+//       car.DTI.setRCurrent(0);
+//    }
+// }
 
 /*
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -285,7 +266,7 @@ void setup() {
    pinMode(on_off_pin, INPUT_PULLUP);
    pinMode(engage_pin, INPUT_PULLUP);
    pinMode(full_pwr_pin, INPUT_PULLUP);
-   pinMode(tc_pin, INPUT_PULLUP);
+   pinMode(brake_pin, INPUT_PULLUP);
    pinMode(pedal_pin, INPUT);
 
    //set beeper pin to output mode

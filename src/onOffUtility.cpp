@@ -7,20 +7,7 @@
 #include <vector>
 #include <cmath>
 
-bool isRejectingStartup(I_no_can_speak_flex &car, bool send_dash_errors = true) {
-    //152: Drive disabled
-    if (car.DTI.getDriveEnable() != 1) {
-        if (send_dash_errors) car.sendDashError(152);
-        return true;
-    }
-
-/*
-    //151: Wait... the thing isn't actually on
-    if (car.DTI.getDCCurrent() <= 0) {
-        car.sendDashError(151);
-        return true;
-    }
-*/
+bool isRejectingStartup(I_no_can_speak_flex &car, Switchboard& s, bool send_dash_errors = true) {
 
     //191: Accelerator engaged
     if ((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 > 0) {
@@ -29,7 +16,8 @@ bool isRejectingStartup(I_no_can_speak_flex &car, bool send_dash_errors = true) 
     }
     
     //192: Brakes not engaged upon startup
-    if (car.pedals.getBrakePressure1() < 50 || car.pedals.getBrakePressure2() < 50) {
+    // if (car.pedals.getBrakePressure1() < 50 || car.pedals.getBrakePressure2() < 50) {
+    if (!s.SWITCH_TEST_BRAKES){
         if (send_dash_errors) car.sendDashError(192);
         return true;
     }
