@@ -25,7 +25,6 @@ float motorOut(float throttle, I_no_can_speak_flex& car, Switchboard& s) {
 States drive(I_no_can_speak_flex& car, Switchboard& s) {
     int brightness_fact = 50;
     if (!s.drive_enable) return OFF;
-    led.clear();
     int R = s.COLOR_MAPPING[static_cast<int>(s.ROTARY_TEST_ACCEL * 1000) / 1000.0].first/brightness_fact;
     int B = s.COLOR_MAPPING[static_cast<int>(s.ROTARY_TEST_ACCEL * 1000 )/ 1000.0].second.second/brightness_fact;
     int G = s.COLOR_MAPPING[static_cast<int>(s.ROTARY_TEST_ACCEL * 1000) / 1000.0].second.first/brightness_fact;
@@ -33,36 +32,23 @@ States drive(I_no_can_speak_flex& car, Switchboard& s) {
     led.setPixelColor(1, led.Color(G,B,R));
     led.setPixelColor(2, led.Color(G,B,R));
 
-    bool power_indicator_on = false;
-    unsigned long interval = 500;
-    unsigned long previous_millis = 0;
-    unsigned long current_millis = millis();
+
     if(s.full_pwr){
-      if (current_millis - previous_millis >= interval) {
-        previous_millis = current_millis;
-        if(power_indicator_on){
-          led.setPixelColor(3, led.Color(0, 0, 0));
-          led.show();
-          power_indicator_on = false;
-        }else{
-          led.setPixelColor(3, led.Color(0, 0, 255/brightness_fact));
-          led.show();
-          power_indicator_on = true;
-        }
+      if(millis()%1000 < 500){
+        led.setPixelColor(3, led.Color(0, 0, 0));
+        led.show();
+      }else{
+        led.setPixelColor(3, led.Color(0, 0, 255/10));
+        led.show();
       }
     }
     else{
-      if (current_millis - previous_millis >= interval) {
-        previous_millis = current_millis;
-        if(power_indicator_on){
-          led.setPixelColor(3, led.Color(0, 0, 0));
-          led.show();
-          power_indicator_on = false;
-        }else{
-          led.setPixelColor(3, led.Color(255/brightness_fact, 0, 255/brightness_fact));
-          led.show();
-          power_indicator_on = true;
-        }
+      if(millis()%1000 < 500){
+        led.setPixelColor(3, led.Color(0, 0, 0));
+        led.show();
+      }else{
+        led.setPixelColor(3, led.Color(0, 255/10, 255/10));
+        led.show();
       }
     }
     
