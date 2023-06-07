@@ -30,10 +30,7 @@ const int pedal_pin = 24;
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
 
-volatile bool APPSBSPDViolation() {
-   return s.drive_engage && (car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 > VALUE_APPS_BSPD_THROTTLE && 
-      (car.pedals.getBrakePressure1() > VALUE_MIN_BRAKE_PRESSURE || car.pedals.getBrakePressure2() > VALUE_MIN_BRAKE_PRESSURE);
-}
+
 
 volatile bool CanReturnFromAPPSBSPD() {
    return !s.drive_engage || (car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 < VALUE_APPS_BSPD_RETURN;
@@ -82,7 +79,10 @@ volatile bool BSEImplausibility() {
       return false;
    }
 }
-
+volatile bool APPSBSPDViolation() {
+   return s.drive_engage && (car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 > VALUE_APPS_BSPD_THROTTLE && 
+      (car.pedals.getBrakePressure1() > VALUE_MIN_BRAKE_PRESSURE || car.pedals.getBrakePressure2() > VALUE_MIN_BRAKE_PRESSURE);
+}
 // AND ONE MORE JUST TO CHECK WHETHER OR NOT THERE'S STILL CRITS. AT STARTUP -rt.z
 volatile bool hasStartupCrits() {
    return criticalCheck(car, false); 
@@ -151,6 +151,22 @@ void loop() {
    }
    s.ROTARY_TEST_ACCEL = analogRead(pedal_pin)/1023.0;
 
+   //fan controller module
+   
+   double check_critical_temp = max(car.DTI.getInvTemp(), car.DTI.getMotorTemp());
+   if(check_critical_temp > 60){
+      car.fans.setFan1Voltage(LIQUID_COOLING_FAN_CURVE[static_cast<int>(check_critical_temp)]);
+      car.fans.setFan2Voltage(LIQUID_COOLING_FAN_CURVE[static_cast<int>(check_critical_temp)]);
+      car.fans.setFan3Voltage(LIQUID_COOLING_FAN_CURVE[static_cast<int>(check_critical_temp)]);
+      car.fans.setFan4Voltage(LIQUID_COOLING_FAN_CURVE[static_cast<int>(check_critical_temp)]);      
+   }
+   else{
+      car.fans.setFan1Voltage(LIQUID_COOLING_FAN_CURVE[static_cast<int>(check_critical_temp)]);
+      car.fans.setFan2Voltage(LIQUID_COOLING_FAN_CURVE[static_cast<int>(check_critical_temp)]);
+      car.fans.setFan3Voltage(LIQUID_COOLING_FAN_CURVE[static_cast<int>(check_critical_temp)]);
+      car.fans.setFan4Voltage(LIQUID_COOLING_FAN_CURVE[static_cast<int>(check_critical_temp)]);
+   }
+   
 
 
    switch (state) {
