@@ -23,6 +23,7 @@ const int on_off_pin = 12;
 const int engage_pin = 11;
 const int full_pwr_pin = 10;
 const int tc_pin = 9;
+const int pedal_pin = 24;
 
 /*
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -106,12 +107,12 @@ States sendToError(volatile States currentState, volatile bool (*erFunc)(void)) 
 void loop() {
 //   car.readData();
    if (state != OFF) {
-      if(hardBrake()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT4);}
-      if(accelUnresponsive()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT5);}
-      if(motorTempHigh()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT6);}
-      if(CANFailure()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT7);}
-      if(currentExceeds()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_0_15);}
-      if(GForceCrash()){NVIC_TRIGGER_IRQ(IRQ_GPIO2_16_31);}
+      // if(hardBrake()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT4);}
+      // if(accelUnresponsive()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT5);}
+      // if(motorTempHigh()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT6);}
+      // if(CANFailure()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT7);}
+      // if(currentExceeds()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_0_15);}
+      // if(GForceCrash()){NVIC_TRIGGER_IRQ(IRQ_GPIO2_16_31);}
       if(APPSImplausibility()) {
          car.sendDashError(97);
          car.DTI.setRCurrent(0);
@@ -124,8 +125,7 @@ void loop() {
       if(APPSBSPDViolation()){NVIC_TRIGGER_IRQ(IRQ_GPIO1_INT3);}
    }
      
-   TS_WARN_Check(car);
-   // Serial.println("WHAT THE FUCK");
+   // TS_WARN_Check(car);
    if(digitalRead(on_off_pin) == HIGH){
       s.drive_enable = 1;
    }else{
@@ -196,19 +196,26 @@ void loop() {
 }
 
 */
+
+
 void loop(){
    led.begin();
    led.clear();
    led.show();
    car.readData();
    //car.setDriveEnable(true);
-   Serial.println(car.DTI.getACCurrent());
+   double MAX_PEDAL_CURRENT = 50;
+   Serial.println(car.DTI.getERPM()/10.0);
    if(digitalRead(on_off_pin) == HIGH){
-      car.setDriveEnable(true);
-      car.setRCurrent(5);
+      car.DTI.setDriveEnable(true);
+      int level = analogRead(pedal_pin);
+      if(level < 25) car.DTI.setRCurrent(0);
+      else{
+         car.DTI.setRCurrent(MAX_PEDAL_CURRENT*level/1023.0);
+      }
    }else{
-      car.setDriveEnable(false);
-      car.setRCurrent(0);
+      car.DTI.setDriveEnable(false);
+      car.DTI.setRCurrent(0);
    }
 }
 
@@ -279,6 +286,7 @@ void setup() {
    pinMode(engage_pin, INPUT_PULLUP);
    pinMode(full_pwr_pin, INPUT_PULLUP);
    pinMode(tc_pin, INPUT_PULLUP);
+   pinMode(pedal_pin, INPUT);
 
    //set beeper pin to output mode
    pinMode(3, OUTPUT);
