@@ -1,5 +1,5 @@
 //onOffUtility.cpp
-// @rt.z, @yarwinliu, 03122023
+// @rt.z
 
 #include "main.h"
 #include "constants.h"
