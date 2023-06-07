@@ -10,6 +10,7 @@ States testing(I_no_can_speak_flex &car, Switchboard& s, States state){
         Serial.println(getTextForEnum(state).c_str());
         Serial.println("-------------------------");
         // printVals(car);
+        Serial.println(s.ROTARY_TEST_ACCEL);
 
 
         time69 = millis();

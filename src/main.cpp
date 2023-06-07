@@ -1,5 +1,5 @@
 //main.cpp
-// @nikunjparasar, @rt.z, @Th3Will
+// @nikunjparasar, @Th3Will, @rtz
 
 #include "main.h"
 #include "mainUtility.h"
@@ -24,7 +24,6 @@ const int engage_pin = 11;
 const int full_pwr_pin = 10;
 const int brake_pin = 9;
 const int pedal_pin = 24;
-
 /*
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                   INTERRUPTS TRIGGER FUNCTIONS

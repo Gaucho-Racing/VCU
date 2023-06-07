@@ -1,29 +1,25 @@
 //drive.cpp
-// @nikunjparasar, @rt.z
+// @nikunjparasar
 
 #include "main.h";
 #include "onOffUtility.h";
-#include <unordered_map>
 
-float motorOut(float throttle, int maxCurrent, I_no_can_speak_flex& car, Switchboard& s) {
-  // i'm assuming throttle is a value between 0 and 100
-  // can adjust accordingly later
-  
-  // figure out range/scaling from getXXspeed()
-  // also not sure if avg is the best way to go
+
+float motorOut(float throttle, I_no_can_speak_flex& car, Switchboard& s) {
+
   // float front = ( car.sensors.getFRspeed() + car.sensors.getFLspeed() ) / 2; // CAN typo lol, should be FL not FF
   // float rear = ( car.sensors.getRRspeed() + car.sensors.getRLspeed() ) / 2; // MIGHT CHANGE TO MOTOR SPEED IN FUTURE
+  const int HIGH_PWR_R_CURRENT = 50;
+  const int LOW_PWR_R_CURRENT = 20;
 
-   return 10 * (throttle);
+  return s.full_pwr ? HIGH_PWR_R_CURRENT* throttle : LOW_PWR_R_CURRENT*throttle;
   // // wheels slipping: traction control
   // // multiplied by 10 is because of some CAN scaling shit
   // if ( s.traction_control && rear  > front*1.25) {
   //   // adjust 0.1 factor in testing
   //   // also add threshold for it to turn on
-    
   //   return 10 * (throttle - 0.1 * (rear - front));
   // }
-  
 }
 
 States drive(I_no_can_speak_flex& car, Switchboard& s) {
@@ -36,20 +32,52 @@ States drive(I_no_can_speak_flex& car, Switchboard& s) {
     led.setPixelColor(0, led.Color(G,B,R));
     led.setPixelColor(1, led.Color(G,B,R));
     led.setPixelColor(2, led.Color(G,B,R));
-    led.setPixelColor(3, led.Color(G,B,R));   
+
+    bool power_indicator_on = false;
+    unsigned long interval = 500;
+    unsigned long previous_millis = 0;
+    unsigned long current_millis = millis();
+    if(s.full_pwr){
+      if (current_millis - previous_millis >= interval) {
+        previous_millis = current_millis;
+        if(power_indicator_on){
+          led.setPixelColor(3, led.Color(0, 0, 0));
+          led.show();
+          power_indicator_on = false;
+        }else{
+          led.setPixelColor(3, led.Color(0, 0, 255/brightness_fact));
+          led.show();
+          power_indicator_on = true;
+        }
+      }
+    }
+    else{
+      if (current_millis - previous_millis >= interval) {
+        previous_millis = current_millis;
+        if(power_indicator_on){
+          led.setPixelColor(3, led.Color(0, 0, 0));
+          led.show();
+          power_indicator_on = false;
+        }else{
+          led.setPixelColor(3, led.Color(255/brightness_fact, 0, 255/brightness_fact));
+          led.show();
+          power_indicator_on = true;
+        }
+      }
+    }
     
 
     led.show();
     // if throttle not applied
     // if((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 <= 0.05) 
-    if(s.ROTARY_TEST_ACCEL < 0.1){
+    if(s.ROTARY_TEST_ACCEL < 0.05){
       return ON_READY;
     }
       
     
     // set motor output
     car.DTI.setDriveEnable(1);
-    car.DTI.setRCurrent(motorOut(s.ROTARY_TEST_ACCEL, 50, car, s));
+    car.DTI.setRCurrent(motorOut(s.ROTARY_TEST_ACCEL, car, s));
 
     // car.DTI.setRCurrent(motorOut((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2, car, s));
     return DRIVE;
