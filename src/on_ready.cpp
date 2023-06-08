@@ -13,7 +13,6 @@ States on_ready(I_no_can_speak_flex &car, Switchboard& s) {
     led.setPixelColor(0, led.Color(255/brightness_fact, 0, 0));
     led.setPixelColor(1, led.Color(255/brightness_fact, 0, 0));
     led.setPixelColor(2, led.Color(255/brightness_fact, 0, 0));
-    led.setPixelColor(3, led.Color(255/brightness_fact, 0, 0));
     led.show();
 
     if(!s.drive_enable) return OFF;

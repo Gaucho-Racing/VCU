@@ -17,7 +17,6 @@ States on(I_no_can_speak_flex &car, Switchboard& s) {
    led.setPixelColor(0, led.Color(0, 255/brightness_fact, 179/brightness_fact));
    led.setPixelColor(1, led.Color(0, 255/brightness_fact, 179/brightness_fact));
    led.setPixelColor(2, led.Color(0, 255/brightness_fact, 179/brightness_fact));
-   led.setPixelColor(3, led.Color(0, 255/brightness_fact, 179/brightness_fact));
    led.show();
 
    if(!s.drive_enable) return OFF;
@@ -40,7 +39,6 @@ States on(I_no_can_speak_flex &car, Switchboard& s) {
          led.setPixelColor(0, led.Color(0, 255/brightness_fact, 13/brightness_fact));
          led.setPixelColor(1, led.Color(0, 255/brightness_fact, 13/brightness_fact));
          led.setPixelColor(2, led.Color(0, 255/brightness_fact, 13/brightness_fact));
-         led.setPixelColor(3, led.Color(0, 255/brightness_fact, 13/brightness_fact));
          led.show();
          delay(150);
          led.clear();

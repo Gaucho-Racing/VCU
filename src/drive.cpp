@@ -32,25 +32,6 @@ States drive(I_no_can_speak_flex& car, Switchboard& s) {
     led.setPixelColor(1, led.Color(G,B,R));
     led.setPixelColor(2, led.Color(G,B,R));
 
-
-    if(s.full_pwr){
-      if(millis()%1000 < 500){
-        led.setPixelColor(3, led.Color(0, 0, 0));
-        led.show();
-      }else{
-        led.setPixelColor(3, led.Color(0, 0, 255/10));
-        led.show();
-      }
-    }
-    else{
-      if(millis()%1000 < 500){
-        led.setPixelColor(3, led.Color(0, 0, 0));
-        led.show();
-      }else{
-        led.setPixelColor(3, led.Color(0, 255/10, 255/10));
-        led.show();
-      }
-    }
     
 
     led.show();

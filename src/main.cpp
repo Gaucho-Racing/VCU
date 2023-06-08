@@ -19,10 +19,10 @@ int apps_implausibility_time = 0, bse_implausibility_time = 0;
 
 Switchboard s;
 I_no_can_speak_flex car(true); 
-const int on_off_pin = 12;
-const int engage_pin = 11;
-const int full_pwr_pin = 10;
-const int brake_pin = 9;
+const int on_off_pin = 11;
+const int engage_pin = 10;
+const int full_pwr_pin = 9;
+const int brake_pin = 12;
 const int pedal_pin = 24;
 
 // DTI HV500 operating temps: -20C to 85C
@@ -162,6 +162,27 @@ void loop() {
    }
    else{
       s.SWITCH_TEST_BRAKES = 0;
+   }
+
+   if(state != OFF){
+      if(s.full_pwr){
+         if(millis()%1000 < 500){
+         led.setPixelColor(3, led.Color(0, 0, 0));
+         led.show();
+         }else{
+         led.setPixelColor(3, led.Color(0, 0, 255/10));
+         led.show();
+         }
+      }
+      else{
+         if(millis()%1000 < 500){
+         led.setPixelColor(3, led.Color(0, 0, 0));
+         led.show();
+         }else{
+         led.setPixelColor(3, led.Color(0, 255/10, 255/10));
+         led.show();
+         }
+      }
    }
    s.ROTARY_TEST_ACCEL = analogRead(pedal_pin)/1023.0;
 
