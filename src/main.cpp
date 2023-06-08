@@ -46,8 +46,6 @@ unordered_map<int, double> LIQUID_COOLING_FAN_CURVE = {
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 */
 
-
-
 volatile bool CanReturnFromAPPSBSPD() {
    return !s.drive_engage || (car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 < VALUE_APPS_BSPD_RETURN;
 }

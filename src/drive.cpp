@@ -23,7 +23,7 @@ float motorOut(float throttle, I_no_can_speak_flex& car, Switchboard& s) {
 }
 
 States drive(I_no_can_speak_flex& car, Switchboard& s) {
-    int brightness_fact = 50;
+    int brightness_fact = 20;
     if (!s.drive_enable) return OFF;
     int R = s.COLOR_MAPPING[static_cast<int>(s.ROTARY_TEST_ACCEL * 1000) / 1000.0].first/brightness_fact;
     int B = s.COLOR_MAPPING[static_cast<int>(s.ROTARY_TEST_ACCEL * 1000 )/ 1000.0].second.second/brightness_fact;

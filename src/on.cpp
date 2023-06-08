@@ -12,7 +12,7 @@
 States on(I_no_can_speak_flex &car, Switchboard& s) {
    car.DTI.setDriveEnable(0);
    car.DTI.setRCurrent(0);
-   int brightness_fact = 50;
+   int brightness_fact = 20;
    led.clear();
    led.setPixelColor(0, led.Color(0, 255/brightness_fact, 179/brightness_fact));
    led.setPixelColor(1, led.Color(0, 255/brightness_fact, 179/brightness_fact));

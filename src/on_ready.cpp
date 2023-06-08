@@ -8,7 +8,7 @@ States on_ready(I_no_can_speak_flex &car, Switchboard& s) {
     //motorOutput = 0;
     car.DTI.setDriveEnable(1);
     car.DTI.setRCurrent(0);
-    int brightness_fact = 50;
+    int brightness_fact = 20;
     led.clear();
     led.setPixelColor(0, led.Color(255/brightness_fact, 0, 0));
     led.setPixelColor(1, led.Color(255/brightness_fact, 0, 0));
