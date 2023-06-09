@@ -20,6 +20,12 @@ States error(I_no_can_speak_flex &car, States prevStates, volatile bool (*erChec
     if((*erCheck)()){
         return ERROR;
     } else {
-        return prevStates;
+        if(s.ACCEL_1 < 0.05){
+            return prevStates;
+        }
+        else{
+            return ERROR;
+        }
+        
     }
 }

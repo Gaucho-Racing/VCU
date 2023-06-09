@@ -25,9 +25,9 @@ float motorOut(float throttle, I_no_can_speak_flex& car, Switchboard& s) {
 States drive(I_no_can_speak_flex& car, Switchboard& s) {
     int brightness_fact = 20;
     if (!s.drive_enable) return OFF;
-    int R = s.COLOR_MAPPING[static_cast<int>(s.ROTARY_TEST_ACCEL * 1000) / 1000.0].first/brightness_fact;
-    int B = s.COLOR_MAPPING[static_cast<int>(s.ROTARY_TEST_ACCEL * 1000 )/ 1000.0].second.second/brightness_fact;
-    int G = s.COLOR_MAPPING[static_cast<int>(s.ROTARY_TEST_ACCEL * 1000) / 1000.0].second.first/brightness_fact;
+    int R = s.COLOR_MAPPING[static_cast<int>(s.ACCEL_1 * 1000) / 1000.0].first/brightness_fact;
+    int B = s.COLOR_MAPPING[static_cast<int>(s.ACCEL_1 * 1000 )/ 1000.0].second.second/brightness_fact;
+    int G = s.COLOR_MAPPING[static_cast<int>(s.ACCEL_1 * 1000) / 1000.0].second.first/brightness_fact;
     led.setPixelColor(0, led.Color(G,B,R));
     led.setPixelColor(1, led.Color(G,B,R));
     led.setPixelColor(2, led.Color(G,B,R));
@@ -37,14 +37,14 @@ States drive(I_no_can_speak_flex& car, Switchboard& s) {
     led.show();
     // if throttle not applied
     // if((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 <= 0.05) 
-    if(s.ROTARY_TEST_ACCEL < 0.05){
+    if(s.ACCEL_1 < 0.05 || s.ACCEL_1 < 0.05){
       return ON_READY;
     }
       
     
     // set motor output
     car.DTI.setDriveEnable(1);
-    car.DTI.setRCurrent(motorOut(s.ROTARY_TEST_ACCEL, car, s));
+    car.DTI.setRCurrent(motorOut((s.ACCEL_1 + s.ACCEL_2)/2.0, car, s));
 
     // car.DTI.setRCurrent(motorOut((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2, car, s));
     return DRIVE;

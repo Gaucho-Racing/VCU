@@ -20,7 +20,7 @@ States on_ready(I_no_can_speak_flex &car, Switchboard& s) {
 
     // if drive mode engaged
     // if((car.pedals.getAPPS1()+car.pedals.getAPPS2())/2 > 0.05) {
-    if(s.ROTARY_TEST_ACCEL > 0.05) {
+    if(s.ACCEL_1 > 0.05 || s.ACCEL_2 > 0.05) {
         led.clear();
         led.show();
         return DRIVE;

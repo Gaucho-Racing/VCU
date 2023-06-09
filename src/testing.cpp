@@ -10,7 +10,14 @@ States testing(I_no_can_speak_flex &car, Switchboard& s, States state){
         Serial.println(getTextForEnum(state).c_str());
         Serial.println("-------------------------");
         // printVals(car);
-        Serial.println(s.ROTARY_TEST_ACCEL);
+        Serial.print("APPS Sensor 1: ");
+        Serial.println(s.ACCEL_1);
+        Serial.print("APPS Sensor 2: ");
+        Serial.println(s.ACCEL_2);
+        Serial.print("Brake Sensor Front: ");
+        Serial.println(s.BRAKE_FRONT);
+        Serial.print("Brake Sensor Rear: ");
+        Serial.println(s.BRAKE_REAR);
 
 
         time69 = millis();

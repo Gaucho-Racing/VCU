@@ -86,29 +86,6 @@ bool criticalCheck(I_no_can_speak_flex &car, bool send_dash_errors = true) {
     //101: Low Battery Temperature
     if (car.BMS.getTemp() < 0) crit_codes.push_back(101);
 
-
-
-    //IMD STARTUP ERRORS (180 - 189):
-    //141: Isolation fault. See can documentation.
-    // if ((i = car.IMD.getIsolationStates()) == 11) crit_codes.push_back(181);
-
-    //142: Isolation state unknown. See can documentation.
-    // if ((i = car.IMD.getIsolationStates()) == 1) crit_codes.push_back(182);
-
-    //143: Isolation Hardware error.
-    // if (car.IMD.getHardware_Error() != 0) crit_codes.push_back(183);
-
-    //144: Electrostatic potential energy exceeds 0.2J
-    // if (car.IMD.getTouch_energy_fault() != 0) crit_codes.push_back(184);
-
-    //145: Exitation pulse not opertional
-    // if (car.IMD.getExc_off() != 0) crit_codes.push_back(185);
-
-    //147: IMD: Low battery Voltage / Battery Disconnect
-    // if (car.IMD.getLow_Battery_Voltage() != 0) crit_codes.push_back(187);
-
-
-
     if (send_dash_errors) for (int code : crit_codes) car.sendDashError((byte)code);
     return (crit_codes.empty());
 }
@@ -155,7 +132,7 @@ bool warningCheck(I_no_can_speak_flex &car, bool send_dash_warnings = true) {
     //40: IMD High Uncertatinty
     // if (car.IMD.getHigh_Uncertainty() != 1) warn_codes.push_back(30);
     
-    int i;
+    
     //41: Isolation warning. See can documentation.
     // if ((i = car.IMD.getIsolationStates()) == 10) warn_codes.push_back(31);
 

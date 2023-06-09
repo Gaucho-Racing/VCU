@@ -47,8 +47,10 @@ struct Switchboard {
   int drive_engage;
   int full_pwr;
   int SWITCH_TEST_BRAKES;
-  double ROTARY_TEST_ACCEL;
-
+  double ACCEL_1;
+  double ACCEL_2;
+  double BRAKE_REAR;
+  double BRAKE_FRONT;
   unordered_map<double, std::pair<int, std::pair<int, int>>> COLOR_MAPPING = {};
 
   Switchboard(){
